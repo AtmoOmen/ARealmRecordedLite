@@ -1,8 +1,10 @@
 using System.Linq;
+using ARealmRecordedLite.Windows;
 using Dalamud.Interface.Windowing;
-using SamplePlugin.Windows;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Shell;
 
-namespace SamplePlugin.Managers;
+namespace ARealmRecordedLite.Managers;
 
 public class WindowManager
 {
@@ -15,19 +17,13 @@ public class WindowManager
         
         InternalWindows.Init();
         
-        DService.UiBuilder.Draw += DrawWindows;
-        DService.UiBuilder.OpenMainUi += ToggleMainWindow;
+        Service.UiBuilder.Draw += DrawWindows;
+        Service.UiBuilder.OpenMainUi += ToggleMainWindow;
     }
 
     private static void DrawWindows() => WindowSystem?.Draw();
 
-    private static void ToggleMainWindow()
-    {
-        var main = Get<Main>();
-        if (main == null) return;
-        
-        main.IsOpen ^= true;
-    }
+    private static unsafe void ToggleMainWindow() => UIModule.Instance()->ExecuteMainCommand(76);
 
     public static bool AddWindow(Window? window)
     {
@@ -57,8 +53,8 @@ public class WindowManager
 
     internal void Uninit()
     {
-        DService.UiBuilder.Draw -= DrawWindows;
-        DService.UiBuilder.OpenMainUi -= ToggleMainWindow;
+        Service.UiBuilder.Draw -= DrawWindows;
+        Service.UiBuilder.OpenMainUi -= ToggleMainWindow;
         
         InternalWindows.Uninit();
         
@@ -70,14 +66,14 @@ public class WindowManager
     {
         internal static void Init()
         {
-            AddWindow(new Main());
-            // ignored
+            AddWindow(new ReplayListWindow());
+            AddWindow(new PlaybackControlWindow());
         }
 
         internal static void Uninit()
         {
-            Get<Main>()?.Dispose();
-            // ignored
+            Get<ReplayListWindow>()?.Dispose();
+            Get<PlaybackControlWindow>()?.Dispose();
         }
     }
 }
