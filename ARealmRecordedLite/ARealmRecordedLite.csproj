@@ -2,7 +2,7 @@
 
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Authors>AtmoOmen</Authors>
+        <Authors>UnknownX, AtmoOmen</Authors>
         <Version>1.0.0.0</Version>
         <Description>A Realm Recorded Lite Version</Description>
         <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
