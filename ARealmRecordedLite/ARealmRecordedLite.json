@@ -1,7 +1,7 @@
 {
     "Author": "AtmoOmen",
     "Name": "A Realm Recorded Lite",
-    "Punchline": "A Realm Recorded 精简版",
+    "Punchline": "A Realm Recorded 精简版\n相比原版: 四分之一的体积、更低的待机消耗、全匿名化的录像处理",
     "Description": "使用 /record 指令打开配置界面\n如显示相关指令未解锁, 请去摩杜纳第七天堂找异国的诗人完成任务「回顾英雄诗篇」",
     "ApplicableVersion": "any",
     "IconUrl": "https://raw.githubusercontent.com/goatcorp/PluginDistD17/main/stable/ARealmRecorded/images/icon.png",
