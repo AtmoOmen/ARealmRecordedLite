@@ -20,6 +20,7 @@ public class Service
         Config = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Config.Init();
 
+        FontManager.Init();
         CoreManager.Init();
         WindowManager.Init();
     }
@@ -28,6 +29,7 @@ public class Service
     {
         WindowManager.Uninit();
         CoreManager.Uninit();
+        FontManager.Uninit();
         
         Config.Uninit();
 
