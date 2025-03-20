@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Config;
+using Dalamud.Game.Gui.Toast;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -17,7 +19,7 @@ using MemoryPatch = ARealmRecordedLite.Utilities.MemoryPatch;
 
 namespace ARealmRecordedLite.Managers;
 
-public unsafe class CoreManager
+public unsafe partial class CoreManager
 {
 
     #region MemoryPatch
@@ -172,7 +174,7 @@ public unsafe class CoreManager
         FormatAddonTextTimestampHook ??= FormatAddonTextTimestampSig.GetHook<FormatAddonTextTimestampDelegate>(FormatAddonTextTimestampDetour);
         FormatAddonTextTimestampHook.Enable();
 
-        ExecuteCommandHook ??= ExecuteCommandSig.GetHook<ExecuteCommandDelegate>(OnPreExecuteCommand);
+        ExecuteCommandHook ??= ExecuteCommandSig.GetHook<ExecuteCommandDelegate>(OnExecuteCommandDetour);
         ExecuteCommandHook.Enable();
 
         ContentsReplayModule.SetSavedReplayCIDs(Service.ClientState.LocalContentId);
@@ -180,10 +182,14 @@ public unsafe class CoreManager
         if (ContentsReplayModule.Instance()->InPlayback && ContentsReplayModule.Instance()->fileStream != nint.Zero &&
             *(long*)ContentsReplayModule.Instance()->fileStream                                        == 0)
             ReplayManager.LoadReplay(Service.Config.LastLoadedReplay);
+        
+        Service.Toast.Toast += OnToast;
     }
 
     internal static void Uninit()
     {
+        Service.Toast.Toast -= OnToast;
+        
         RemoveRecordReadyToastPatch.Disable();
         AlwaysRecordPatch.Disable();
         SeIsABunchOfClownsPatch.Disable();
@@ -384,12 +390,8 @@ public unsafe class CoreManager
 
     private static bool ReplayPacketDetour(ContentsReplayModule* contentsReplayModule, FFXIVReplay.DataSegment* segment, byte* data) =>
         ReplayPacketManager.ReplayPacket(segment, data) || ReplayPacketHook.Original(contentsReplayModule, segment, data);
-
-    #endregion
-
-    #region Event
-
-    private static nint OnPreExecuteCommand(int command, int param1, int param2, int param3, int param4)
+    
+    private static nint OnExecuteCommandDetour(int command, int param1, int param2, int param3, int param4)
     {
         if (!ContentsReplayModule.Instance()->InPlayback ||
             FlagsToIgnore.Contains(command))
@@ -401,6 +403,17 @@ public unsafe class CoreManager
         return nint.Zero;
     }
 
+
+    #endregion
+
+    #region Event
+
+    private static void OnToast(ref SeString message, ref ToastOptions options, ref bool isHandled)
+    {
+        if (isHandled || (!ContentsReplayModule.Instance()->IsLoadingChapter && ContentsReplayModule.Instance()->Speed < 5)) return;
+        isHandled = true;
+    }
+    
     #endregion
 
     #region Delegate
@@ -413,7 +426,7 @@ public unsafe class CoreManager
 
     #endregion
 
-    private static readonly Regex bannedFileCharacters = new("[\\\\\\/:\\*\\?\"\\<\\>\\|\u0000-\u001F]");
+    private static readonly Regex bannedFileCharacters = MyRegex();
 
     private static List<(FileInfo, FFXIVReplay)>? replayList;
 
@@ -745,4 +758,7 @@ public unsafe class CoreManager
 
         Marshal.WriteByte(address + str.Length, 0);
     }
+
+    [GeneratedRegex("[\\\\\\/:\\*\\?\"\\<\\>\\|\u0000-\u001F]")]
+    private static partial Regex MyRegex();
 }

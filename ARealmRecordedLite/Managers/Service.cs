@@ -50,6 +50,7 @@ public class Service
     [PluginService] public static IPluginLog           Log            { get; private set; } = null!;
     [PluginService] public static ITargetManager       Targets        { get; private set; } = null!;
     [PluginService] public static ITextureProvider     Texture        { get; private set; } = null!;
+    [PluginService] public static IToastGui            Toast          { get; private set; } = null!;
 
     public static IDalamudPluginInterface PI         { get; private set; } = null!;
     public static IUiBuilder              UiBuilder  { get; private set; } = null!;
