@@ -22,103 +22,107 @@ public unsafe struct ContentsReplayModule
         return instance;
     }
     
-    public static void SetSavedReplayCIDs(ulong cID)
+    public static void SetSavedReplayCIDs()
     {
-        if (Instance()->savedReplayHeaders == null) return;
+        if (Instance()->SavedReplayHeaders == null) return;
+
+        // 始终为 0 避免信息泄露
+        const ulong contentID = 0;
 
         for (var i = 0; i < 3; i++)
         {
-            var header = Instance()->savedReplayHeaders[i];
+            var header = Instance()->SavedReplayHeaders[i];
             if (!header.IsValid) continue;
-            header.localCID                   = cID;
-            Instance()->savedReplayHeaders[i] = header;
+            
+            header.LocalCID                   = contentID;
+            Instance()->SavedReplayHeaders[i] = header;
         }
     }
     
-    public static byte GetCurrentChapter() => Instance()->chapters.FindPreviousChapterFromTime((uint)(Instance()->Seek * 1000));
+    public static byte GetCurrentChapter() => Instance()->ReplayChapters.FindPreviousChapterFromTime((uint)(Instance()->Seek * 1000));
 
 
     [StructLayout(LayoutKind.Explicit, Size = 0x70)]
     public struct InitZonePacket
     {
-        [FieldOffset(0x0)] public ushort u0x0;
-        [FieldOffset(0x2)] public ushort territoryType;
-        [FieldOffset(0x4)] public ushort u0x4;
-        [FieldOffset(0x6)] public ushort contentFinderCondition;
+        [FieldOffset(0x0)] public ushort Unknown0x0;
+        [FieldOffset(0x2)] public ushort TerritoryType;
+        [FieldOffset(0x4)] public ushort Unknown0x4;
+        [FieldOffset(0x6)] public ushort ContentFinderCondition;
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 0xC0)]
     public struct UnknownPacket;
 
-    [FieldOffset(0x0)]   public int                      gameBuildNumber;
-    [FieldOffset(0x8)]   public nint                     fileStream;
-    [FieldOffset(0x10)]  public nint                     fileStreamNextWrite;
-    [FieldOffset(0x18)]  public nint                     fileStreamEnd;
-    [FieldOffset(0x20)]  public long                     u0x20;
-    [FieldOffset(0x28)]  public long                     u0x28;
-    [FieldOffset(0x30)]  public long                     dataOffset;
+    [FieldOffset(0x0)]   public int                      GameBuildNumber;
+    [FieldOffset(0x8)]   public nint                     FileStream;
+    [FieldOffset(0x10)]  public nint                     FileStreamNextWrite;
+    [FieldOffset(0x18)]  public nint                     FileStreamEnd;
+    [FieldOffset(0x20)]  public long                     Unknown0x20;
+    [FieldOffset(0x28)]  public long                     Unknown0x28;
+    [FieldOffset(0x30)]  public long                     DataOffset;
     [FieldOffset(0x38)]  public long                     OverallDataOffset;
-    [FieldOffset(0x40)]  public long                     lastDataOffset;
-    [FieldOffset(0x48)]  public FFXIVReplay.Header       replayHeader;
-    [FieldOffset(0xB0)]  public FFXIVReplay.ChapterArray chapters;
-    [FieldOffset(0x3B8)] public Utf8String               contentTitle;
-    [FieldOffset(0x420)] public long                     nextDataSection;
-    [FieldOffset(0x428)] public long                     numberBytesRead;
-    [FieldOffset(0x430)] public int                      currentFileSection;
-    [FieldOffset(0x434)] public int                      dataLoadType;
-    [FieldOffset(0x438)] public long                     dataLoadOffset;
-    [FieldOffset(0x440)] public long                     dataLoadLength;
+    [FieldOffset(0x40)]  public long                     LastDataOffset;
+    [FieldOffset(0x48)]  public FFXIVReplay.Header       ReplayHeader;
+    [FieldOffset(0xB0)]  public FFXIVReplay.ChapterArray ReplayChapters;
+    [FieldOffset(0x3B8)] public Utf8String               ContentTitle;
+    [FieldOffset(0x420)] public long                     NextDataSection;
+    [FieldOffset(0x428)] public long                     NumberBytesRead;
+    [FieldOffset(0x430)] public int                      CurrentFileSection;
+    [FieldOffset(0x434)] public int                      DataLoadType;
+    [FieldOffset(0x438)] public long                     DataLoadOffset;
+    [FieldOffset(0x440)] public long                     DataLoadLength;
     [FieldOffset(0x448)] public long                     dataLoadFileOffset;
-    [FieldOffset(0x450)] public long                     localCID;
-    [FieldOffset(0x458)] public byte                     currentReplaySlot;
-    [FieldOffset(0x460)] public Utf8String               characterRecordingName;
-    [FieldOffset(0x4C8)] public Utf8String               replayTitle;
-    [FieldOffset(0x530)] public Utf8String               u0x530;
-    [FieldOffset(0x598)] public float                    recordingTime;
-    [FieldOffset(0x5A0)] public long                     recordingLength;
-    [FieldOffset(0x5A8)] public int                      u0x5A8;
-    [FieldOffset(0x5AC)] public byte                     u0x5AC;
-    [FieldOffset(0x5AD)] public byte                     nextReplaySaveSlot;
-    [FieldOffset(0x5B0)] public FFXIVReplay.Header*      savedReplayHeaders;
-    [FieldOffset(0x5B8)] public nint                     u0x5B8;
-    [FieldOffset(0x5C0)] public nint                     u0x5C0;
-    [FieldOffset(0x5C8)] public byte                     u0x5C8;
-    [FieldOffset(0x5CC)] public uint                     localPlayerObjectID;
-    [FieldOffset(0x5D0)] public InitZonePacket           initZonePacket;
-    [FieldOffset(0x640)] public long                     u0x640;
-    [FieldOffset(0x648)] public UnknownPacket            u0x648;
-    [FieldOffset(0x708)] public int                      u0x708;
+    [FieldOffset(0x450)] public long                     LocalCID;
+    [FieldOffset(0x458)] public byte                     CurrentReplaySlot;
+    [FieldOffset(0x460)] public Utf8String               CharacterRecordingName;
+    [FieldOffset(0x4C8)] public Utf8String               ReplayTitle;
+    [FieldOffset(0x530)] public Utf8String               Unknown0x530;
+    [FieldOffset(0x598)] public float                    RecordingTime;
+    [FieldOffset(0x5A0)] public long                     RecordingLength;
+    [FieldOffset(0x5A8)] public int                      Unknown0x5A8;
+    [FieldOffset(0x5AC)] public byte                     Unknown0x5AC;
+    [FieldOffset(0x5AD)] public byte                     NextReplaySaveSlot;
+    [FieldOffset(0x5B0)] public FFXIVReplay.Header*      SavedReplayHeaders;
+    [FieldOffset(0x5B8)] public nint                     Unknown0x5B8;
+    [FieldOffset(0x5C0)] public nint                     Unknown0x5C0;
+    [FieldOffset(0x5C8)] public byte                     Unknown0x5C8;
+    [FieldOffset(0x5CC)] public uint                     LocalPlayerObjectID;
+    [FieldOffset(0x5D0)] public InitZonePacket           InitZonePacketData;
+    [FieldOffset(0x640)] public long                     Unknown0x640;
+    [FieldOffset(0x648)] public UnknownPacket            Unknown0x648;
+    [FieldOffset(0x708)] public int                      Unknown0x708;
     [FieldOffset(0x70C)] public float                    Seek;
-    [FieldOffset(0x710)] public float                    seekDelta;
+    [FieldOffset(0x710)] public float                    SeekDelta;
     [FieldOffset(0x714)] public float                    Speed;
-    [FieldOffset(0x718)] public float                    u0x718;
-    [FieldOffset(0x71C)] public byte                     selectedChapter;
-    [FieldOffset(0x720)] public uint                     startingMS;
-    [FieldOffset(0x724)] public int                      u0x724;
-    [FieldOffset(0x728)] public short                    u0x728;
-    [FieldOffset(0x72A)] public byte                     status;
-    [FieldOffset(0x72B)] public byte                     playbackControls;
-    [FieldOffset(0x72C)] public byte                     u0x72C;
+    [FieldOffset(0x718)] public float                    Unknown0x718;
+    [FieldOffset(0x71C)] public byte                     SelectedChapter;
+    [FieldOffset(0x720)] public uint                     StartingMS;
+    [FieldOffset(0x724)] public int                      Unknown0x724;
+    [FieldOffset(0x728)] public short                    Unknown0x728;
+    [FieldOffset(0x72A)] public byte                     Status;
+    [FieldOffset(0x72B)] public byte                     PlaybackControls;
+    [FieldOffset(0x72C)] public byte                     Unknown0x72C;
 
-    public bool InPlayback       => (playbackControls & 4)    != 0;
-    public bool IsPaused         => (playbackControls & 8)    != 0;
-    public bool IsSavingPackets  => (status           & 4)    != 0;
-    public bool IsRecording      => (status           & 0x74) == 0x74;
-    public bool IsLoadingChapter => selectedChapter           < 0x40;
+    public bool InPlayback       => (PlaybackControls & 4)    != 0;
+    public bool IsPaused         => (PlaybackControls & 8)    != 0;
+    public bool IsSavingPackets  => (Status           & 4)    != 0;
+    public bool IsRecording      => (Status           & 0x74) == 0x74;
+    public bool IsLoadingChapter => SelectedChapter           < 0x40;
     
     public void FixNextReplaySaveSlot(int maxAutoRenamedReplays)
     {
-        if (maxAutoRenamedReplays <= 0 && !savedReplayHeaders[nextReplaySaveSlot].IsLocked) return;
+        if (maxAutoRenamedReplays <= 0 && !SavedReplayHeaders[NextReplaySaveSlot].IsLocked) return;
 
         for (byte i = 0; i < 3; i++)
         {
             if (i != 2)
             {
-                var header = savedReplayHeaders[i];
+                var header = SavedReplayHeaders[i];
                 if (header.IsLocked) continue;
             }
 
-            nextReplaySaveSlot = i;
+            NextReplaySaveSlot = i;
             return;
         }
     }
@@ -130,8 +134,7 @@ public unsafe struct ContentsReplayModule
     
     public void BeginRecording(bool saveRecording = true)
     {
-        if (beginRecording == null)
-            beginRecording = BeginRecordingSig.GetDelegate<BeginRecordingDelegate>();
+        beginRecording ??= BeginRecordingSig.GetDelegate<BeginRecordingDelegate>();
 
         fixed (ContentsReplayModule* ptr = &this)
             beginRecording.Invoke(ptr, saveRecording);
@@ -144,8 +147,7 @@ public unsafe struct ContentsReplayModule
     
     public void EndRecording()
     {
-        if (endRecording == null)
-            endRecording = EndRecordingSig.GetDelegate<EndRecordingDelegate>();
+        endRecording ??= EndRecordingSig.GetDelegate<EndRecordingDelegate>();
         fixed (ContentsReplayModule* ptr = &this)
             endRecording.Invoke(ptr);
     }
@@ -157,9 +159,8 @@ public unsafe struct ContentsReplayModule
 
     public void OnZoneInPacket(uint objectID, nint packet)
     {
-        if (onZoneInPacket == null)
-            onZoneInPacket = OnZoneInPacketSig.GetDelegate<OnZoneInPacketDelegate>();
-        
+        onZoneInPacket ??= OnZoneInPacketSig.GetDelegate<OnZoneInPacketDelegate>();
+
         fixed(ContentsReplayModule* ptr = &this)
             onZoneInPacket.Invoke(ptr, objectID, packet);
     }
@@ -171,9 +172,8 @@ public unsafe struct ContentsReplayModule
 
     public void InitializeRecording()
     {
-        if (initializeRecording == null)
-            initializeRecording = InitializeRecordingSig.GetDelegate<InitializeRecordingDelegate>();
-        
+        initializeRecording ??= InitializeRecordingSig.GetDelegate<InitializeRecordingDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             initializeRecording.Invoke(ptr);
     }
@@ -185,9 +185,8 @@ public unsafe struct ContentsReplayModule
 
     public bool RequestPlayback(byte slot = 0)
     {
-        if (requestPlayback == null)
-            requestPlayback = RequestPlaybackSig.GetDelegate<RequestPlaybackDelegate>();
-        
+        requestPlayback ??= RequestPlaybackSig.GetDelegate<RequestPlaybackDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             return requestPlayback.Invoke(ptr, slot);
     }
@@ -199,8 +198,7 @@ public unsafe struct ContentsReplayModule
 
     public void ReceiveActorControlPacket(uint objectID, nint packet)
     {
-        if (receiveActorControlPacket == null)
-            receiveActorControlPacket = ReceiveActorControlPacketSig.GetDelegate<ReceiveActorControlPacketDelegate>();
+        receiveActorControlPacket ??= ReceiveActorControlPacketSig.GetDelegate<ReceiveActorControlPacketDelegate>();
 
         fixed (ContentsReplayModule* ptr = &this)
             receiveActorControlPacket.Invoke(ptr, objectID, packet);
@@ -213,9 +211,8 @@ public unsafe struct ContentsReplayModule
     
     public void BeginPlayback(bool allowed = true)
     {
-        if (beginPlayback == null)
-            beginPlayback = BeginPlaybackSig.GetDelegate<BeginPlaybackDelegate>();
-        
+        beginPlayback ??= BeginPlaybackSig.GetDelegate<BeginPlaybackDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             beginPlayback.Invoke(ptr, allowed);
     }
@@ -227,27 +224,11 @@ public unsafe struct ContentsReplayModule
 
     public bool SetChapter(byte chapter)
     {
-        if (setChapter == null)
-            setChapter = SetChapterSig.GetDelegate<SetChapterDelegate>();
-        
+        setChapter ??= SetChapterSig.GetDelegate<SetChapterDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             return setChapter.Invoke(ptr, chapter);
     }
-    
-
-    public static readonly CompSig OnSetChapterSig = new("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC 30 48 8B F1 0F B6 EA");
-    public delegate        void    OnSetChapterDelegate(ContentsReplayModule* contentsReplayModule, byte chapter);
-    private static         OnSetChapterDelegate? onSetChapter;
-
-    public void OnSetChapter(byte chapter)
-    {
-        if (onSetChapter == null)
-            onSetChapter = OnSetChapterSig.GetDelegate<OnSetChapterDelegate>();
-        
-        fixed (ContentsReplayModule* ptr = &this)
-            onSetChapter.Invoke(ptr, chapter);
-    }
-
 
     public static readonly CompSig WritePacketSig = new("E8 ?? ?? ?? ?? 84 C0 74 60 33 C0");
     public delegate        bool    WritePacketDelegate(ContentsReplayModule* contentsReplayModule, uint objectID, ushort opcode, byte* data, ulong length);
@@ -255,18 +236,16 @@ public unsafe struct ContentsReplayModule
     
     public bool WritePacket(uint objectID, ushort opcode, byte* data, ulong length)
     {
-        if (writePacket == null)
-            writePacket = WritePacketSig.GetDelegate<WritePacketDelegate>();
-        
+        writePacket ??= WritePacketSig.GetDelegate<WritePacketDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             return writePacket.Invoke(ptr, objectID, opcode, data, length);
     }
 
     public bool WritePacket(uint objectID, ushort opcode, byte[] data)
     {
-        if (writePacket == null)
-            writePacket = WritePacketSig.GetDelegate<WritePacketDelegate>();
-        
+        writePacket ??= WritePacketSig.GetDelegate<WritePacketDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
         fixed (byte* dataPtr = data)
             return writePacket.Invoke(ptr, objectID, opcode, dataPtr, (ulong)data.Length);
@@ -278,18 +257,16 @@ public unsafe struct ContentsReplayModule
     
     public bool ReplayPacket(FFXIVReplay.DataSegment* segment)
     {
-        if (replayPacket == null)
-            replayPacket = ReplayPacketSig.GetDelegate<ReplayPacketDelegate>();
-        
+        replayPacket ??= ReplayPacketSig.GetDelegate<ReplayPacketDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
             return replayPacket.Invoke(ptr, segment, segment->Data);
     }
 
     public bool ReplayPacket(FFXIVReplay.DataSegment segment, byte[] data)
     {
-        if (replayPacket == null)
-            replayPacket = ReplayPacketSig.GetDelegate<ReplayPacketDelegate>();
-        
+        replayPacket ??= ReplayPacketSig.GetDelegate<ReplayPacketDelegate>();
+
         fixed (ContentsReplayModule* ptr = &this)
         fixed (byte* dataPtr = data)
             return replayPacket.Invoke(ptr, &segment, dataPtr);
@@ -304,26 +281,26 @@ public unsafe struct FFXIVReplay
     [StructLayout(LayoutKind.Explicit, Size = 0x68)]
     public struct Header
     {
-        private static readonly byte[] validBytes = "FFXIVREPLAY"u8.ToArray();
-
         [FieldOffset(0x0)]  public fixed byte   FFXIVREPLAY[12];
-        [FieldOffset(0xC)]  public       short  replayFormatVersion;
-        [FieldOffset(0xE)]  public       short  operatingSystemType;
-        [FieldOffset(0x10)] public       int    gameBuildNumber;
-        [FieldOffset(0x14)] public       uint   timestamp;
-        [FieldOffset(0x18)] public       uint   totalMS;
-        [FieldOffset(0x1C)] public       uint   displayedMS;
-        [FieldOffset(0x20)] public       ushort contentID;
-        [FieldOffset(0x28)] public       byte   info;
-        [FieldOffset(0x30)] public       ulong  localCID;
-        [FieldOffset(0x38)] public fixed byte   jobs[8];
-        [FieldOffset(0x40)] public       byte   playerIndex;
-        [FieldOffset(0x44)] public       int    u0x44;
-        [FieldOffset(0x48)] public       int    replayLength;
-        [FieldOffset(0x4C)] public       short  u0x4C;
-        [FieldOffset(0x4E)] public fixed ushort npcNames[7];
-        [FieldOffset(0x5C)] public       int    u0x5C;
-        [FieldOffset(0x60)] public       long   u0x60;
+        [FieldOffset(0xC)]  public       short  ReplayFormatVersion;
+        [FieldOffset(0xE)]  public       short  OperatingSystemType;
+        [FieldOffset(0x10)] public       int    GameBuildNumber;
+        [FieldOffset(0x14)] public       uint   Timestamp;
+        [FieldOffset(0x18)] public       uint   TotalMS;
+        [FieldOffset(0x1C)] public       uint   DisplayedMS;
+        [FieldOffset(0x20)] public       ushort ContentFinderConditionID;
+        [FieldOffset(0x28)] public       byte   Info;
+        [FieldOffset(0x30)] public       ulong  LocalCID;
+        [FieldOffset(0x38)] public fixed byte   Jobs[8];
+        [FieldOffset(0x40)] public       byte   PlayerIndex;
+        [FieldOffset(0x44)] public       int    Unknown0x44;
+        [FieldOffset(0x48)] public       int    ReplayLength;
+        [FieldOffset(0x4C)] public       short  Unknown0x4C;
+        [FieldOffset(0x4E)] public fixed ushort NPCNames[7];
+        [FieldOffset(0x5C)] public       int    Unknown0x5C;
+        [FieldOffset(0x60)] public       long   Unknown0x60;
+        
+        private static readonly byte[] validBytes = "FFXIVREPLAY"u8.ToArray();
 
         public bool IsValid
         {
@@ -338,19 +315,19 @@ public unsafe struct FFXIVReplay
             }
         }
 
-        public bool IsPlayable => gameBuildNumber == ContentsReplayModule.Instance()->gameBuildNumber && IsCurrentFormatVersion;
+        public bool IsPlayable => GameBuildNumber == ContentsReplayModule.Instance()->GameBuildNumber && IsCurrentFormatVersion;
 
-        public bool IsCurrentFormatVersion => replayFormatVersion == CurrentReplayFormatVersion;
+        public bool IsCurrentFormatVersion => ReplayFormatVersion == CurrentReplayFormatVersion;
 
-        public bool IsLocked => IsValid && IsPlayable && (info & 2) != 0;
+        public bool IsLocked => IsValid && IsPlayable && (Info & 2) != 0;
 
         public ContentFinderCondition ContentFinderCondition => 
-            (ContentFinderCondition)Service.Data.GetExcelSheet<ContentFinderCondition>().GetRowOrDefault(contentID)!;
+            (ContentFinderCondition)Service.Data.GetExcelSheet<ContentFinderCondition>().GetRowOrDefault(ContentFinderConditionID)!;
 
         public ClassJob LocalPlayerClassJob => 
-            (ClassJob)Service.Data.GetExcelSheet<ClassJob>().GetRowOrDefault(jobs[playerIndex])!;
+            (ClassJob)Service.Data.GetExcelSheet<ClassJob>().GetRowOrDefault(Jobs[PlayerIndex])!;
 
-        private byte GetJobSafe(int i) => jobs[i];
+        private byte GetJobSafe(int i) => Jobs[i];
 
         public IEnumerable<ClassJob> ClassJobs => Enumerable.Range(0, 8)
                                                             .Select(GetJobSafe).TakeWhile(id => id != 0)
@@ -400,7 +377,7 @@ public unsafe struct FFXIVReplay
         }
         
         public static byte FindPreviousChapterType(byte type) =>
-            ContentsReplayModule.Instance()->chapters.FindPreviousChapterType(ContentsReplayModule.GetCurrentChapter(), type);
+            ContentsReplayModule.Instance()->ReplayChapters.FindPreviousChapterType(ContentsReplayModule.GetCurrentChapter(), type);
         
         public byte FindNextChapterType(byte chapter, byte type)
         {
@@ -411,7 +388,7 @@ public unsafe struct FFXIVReplay
         }
         
         public static byte FindNextChapterType(byte type) => 
-            ContentsReplayModule.Instance()->chapters.FindNextChapterType(ContentsReplayModule.GetCurrentChapter(), type);
+            ContentsReplayModule.Instance()->ReplayChapters.FindNextChapterType(ContentsReplayModule.GetCurrentChapter(), type);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -434,8 +411,8 @@ public unsafe struct FFXIVReplay
         }
     }
 
-    public Header header;
-    public ChapterArray chapters;
+    public Header       ReplayHeader;
+    public ChapterArray ReplayChapters;
 
     public byte* Data
     {
@@ -446,7 +423,7 @@ public unsafe struct FFXIVReplay
         }
     }
 
-    public DataSegment* GetDataSegment(uint offset) => offset < header.replayLength ? (DataSegment*)(Data + offset) : null;
+    public DataSegment* GetDataSegment(uint offset) => offset < ReplayHeader.ReplayLength ? (DataSegment*)(Data + offset) : null;
 
     public DataSegment* FindNextDataSegment(uint ms, out uint offset)
     {
@@ -466,14 +443,14 @@ public unsafe struct FFXIVReplay
     {
         var pulls       = 0;
         var longestPull = TimeSpan.Zero;
-        for (byte j = 0; j < chapters.length; j++)
+        for (byte j = 0; j < ReplayChapters.length; j++)
         {
-            var chapter = chapters[j];
+            var chapter = ReplayChapters[j];
             if (chapter->type != 2 && j != 0) continue;
 
-            if (j < chapters.length - 1)
+            if (j < ReplayChapters.length - 1)
             {
-                var nextChapter = chapters[j + 1];
+                var nextChapter = ReplayChapters[j + 1];
                 if (nextChapter->type == 1)
                 {
                     chapter = nextChapter;
@@ -481,7 +458,7 @@ public unsafe struct FFXIVReplay
                 }
             }
 
-            var nextStartMS = chapters.FindNextChapterType(j, 2) is var nextStart && nextStart > 0 ? chapters[nextStart]->ms : header.totalMS;
+            var nextStartMS = ReplayChapters.FindNextChapterType(j, 2) is var nextStart && nextStart > 0 ? ReplayChapters[nextStart]->ms : ReplayHeader.TotalMS;
             var ms          = (int)(nextStartMS - chapter->ms);
             if (ms > 30_000) pulls++;
 

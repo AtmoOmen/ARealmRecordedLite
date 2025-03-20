@@ -58,7 +58,7 @@ public unsafe partial class ReplayListWindow : Window
 
         if (ImGui.Button(FontAwesomeIcon.SyncAlt.ToIconString()))
         {
-            CoreManager.GetReplayList();
+            ReplayFileManager.GetReplayList();
             NeedSort = true;
         }
 
@@ -66,13 +66,13 @@ public unsafe partial class ReplayListWindow : Window
 
         ImGui.SameLine();
         if (ImGui.Button(FontAwesomeIcon.FolderOpen.ToIconString()))
-            CoreManager.OpenReplayFolder();
+            ReplayFileManager.OpenReplayFolder();
         ImGuiOm.TooltipHover("打开回放文件目录");
 
         ImGui.SameLine();
         if (ImGui.Button(FontAwesomeIcon.FileArchive.ToIconString()))
         {
-            CoreManager.ArchiveReplays();
+            ReplayFileManager.ArchiveReplays();
             NeedSort = true;
         }
 
@@ -92,7 +92,7 @@ public unsafe partial class ReplayListWindow : Window
         ImGui.SameLine();
         if (ImGui.Button("加载录像"))
         {
-            ReplayManager.LoadReplay(CoreManager.LastSelectedReplay);
+            ReplayManager.LoadReplay(ReplayFileManager.LastSelectedReplay);
             ContentsReplayModule.Instance()->SetChapter(0);
         }
 
@@ -122,41 +122,41 @@ public unsafe partial class ReplayListWindow : Window
         if (sortspecs.SpecsDirty || NeedSort || ImGui.IsWindowAppearing())
         {
             if (sortspecs.Specs.ColumnIndex == 0)
-                CoreManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                ReplayFileManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
                                       ?
                                       [
-                                          .. CoreManager.ReplayList.OrderByDescending(t => t.Item2.header.IsPlayable)
-                                                 .ThenBy(t => t.Item2.header.timestamp)
+                                          .. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable)
+                                                 .ThenBy(t => t.Item2.ReplayHeader.Timestamp)
                                       ]
                                       :
                                       [
-                                          .. CoreManager.ReplayList.OrderByDescending(t => t.Item2.header.IsPlayable)
-                                                 .ThenByDescending(t => t.Item2.header.timestamp)
+                                          .. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable)
+                                                 .ThenByDescending(t => t.Item2.ReplayHeader.Timestamp)
                                       ];
             else
-                CoreManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
-                                      ? [.. CoreManager.ReplayList.OrderByDescending(t => t.Item2.header.IsPlayable).ThenBy(t => t.Item1.Name)]
-                                      : [.. CoreManager.ReplayList.OrderByDescending(t => t.Item2.header.IsPlayable).ThenByDescending(t => t.Item1.Name)];
+                ReplayFileManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                      ? [.. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable).ThenBy(t => t.Item1.Name)]
+                                      : [.. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable).ThenByDescending(t => t.Item1.Name)];
 
             sortspecs.SpecsDirty = false;
             NeedSort             = false;
         }
 
-        for (var i = 0; i < CoreManager.ReplayList.Count; i++)
+        for (var i = 0; i < ReplayFileManager.ReplayList.Count; i++)
         {
-            var (file, replay) = CoreManager.ReplayList[i];
-            var header      = replay.header;
+            var (file, replay) = ReplayFileManager.ReplayList[i];
+            var header      = replay.ReplayHeader;
             var path        = file.FullName;
             var fileName    = file.Name;
             var displayName = DisplayNameRegex.Match(fileName) is { Success: true } match ? match.Groups[1].Value : fileName[..fileName.LastIndexOf('.')];
-            var isPlayable  = replay.header.IsPlayable;
+            var isPlayable  = replay.ReplayHeader.IsPlayable;
             var autoRenamed = file.Directory?.Name == "autorenamed";
 
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
             using (ImRaii.Disabled(!isPlayable))
-                ImGui.TextUnformatted(DateTimeOffset.FromUnixTimeSeconds(header.timestamp).LocalDateTime.ToString("g"));
+                ImGui.TextUnformatted(DateTimeOffset.FromUnixTimeSeconds(header.Timestamp).LocalDateTime.ToString("g"));
 
             ImGui.TableNextColumn();
             if (EditingReplay != i)
@@ -164,12 +164,12 @@ public unsafe partial class ReplayListWindow : Window
                 using (ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled), !isPlayable))
                 {
                     if (ImGui.Selectable(autoRenamed ? $"- {displayName}##{path}" : $"{displayName}##{path}",
-                                         path == CoreManager.LastSelectedReplay && *(byte*)((nint)agent + 0x2C) == 100,
+                                         path == ReplayFileManager.LastSelectedReplay && *(byte*)((nint)agent + 0x2C) == 100,
                                          ImGuiSelectableFlags.SpanAllColumns))
-                        CoreManager.SetDutyRecorderMenuSelection((nint)agent, path, header);
+                        ReplayFileManager.SetDutyRecorderMenuSelection((nint)agent, path, header);
                 }
 
-                if (replay.header.IsCurrentFormatVersion && ImGui.IsItemHovered())
+                if (replay.ReplayHeader.IsCurrentFormatVersion && ImGui.IsItemHovered())
                 {
                     var (pulls, longestPull) = replay.GetPullInfo();
 
@@ -178,7 +178,7 @@ public unsafe partial class ReplayListWindow : Window
                     using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero))
                     {
                         ImGui.TextUnformatted($"任务: {header.ContentFinderCondition.Name.ToDalamudString()}");
-                        if ((header.info & 4) != 0)
+                        if ((header.Info & 4) != 0)
                         {
                             ImGui.SameLine();
                             ImGui.TextUnformatted(" ");
@@ -209,7 +209,7 @@ public unsafe partial class ReplayListWindow : Window
                             else { ImGui.Image(texture.GetWrapOrEmpty().ImGuiHandle, new(ImGui.GetTextLineHeight())); }
                         }
 
-                        ImGui.TextUnformatted($"长度: {new TimeSpan(0, 0, 0, 0, (int)header.displayedMS):hh':'mm':'ss}");
+                        ImGui.TextUnformatted($"长度: {new TimeSpan(0, 0, 0, 0, (int)header.DisplayedMS):hh':'mm':'ss}");
                         if (pulls > 1)
                         {
                             ImGui.TextUnformatted($"重试次数: {pulls}");
@@ -225,13 +225,13 @@ public unsafe partial class ReplayListWindow : Window
                     for (byte j = 0; j < 3; j++)
                     {
                         if (!ImGui.Selectable($"复制到第 {j + 1} 槽")) continue;
-                        CoreManager.CopyReplayIntoSlot((nint)agent, file, header, j);
+                        ReplayFileManager.CopyReplayIntoSlot((nint)agent, file, header, j);
                         NeedSort = true;
                     }
 
                     if (ImGui.Selectable("删除"))
                     {
-                        CoreManager.DeleteReplay(file);
+                        ReplayFileManager.DeleteReplay(file);
                         NeedSort = true;
                     }
 
@@ -256,7 +256,7 @@ public unsafe partial class ReplayListWindow : Window
                 EditingReplay = -1;
 
                 if (ImGui.IsItemDeactivatedAfterEdit())
-                    CoreManager.RenameReplay(file, EditingName);
+                    ReplayFileManager.RenameReplay(file, EditingName);
             }
         }
     }

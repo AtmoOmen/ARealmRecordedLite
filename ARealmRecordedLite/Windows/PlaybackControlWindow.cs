@@ -54,15 +54,15 @@ public unsafe class PlaybackControlWindow : Window
 
         if (!LoadedPlayback)
         {
-            if (ContentsReplayModule.Instance()->u0x708 != 0)
+            if (ContentsReplayModule.Instance()->Unknown0x708 != 0)
             {
                 ImGui.Text("录像加载中...");
                 LoadingPlayback = true;
                 return;
             }
 
-            LoadedPlayback = true;
-            if (!Service.Config.EnableWaymarks) CoreManager.ToggleWaymarks();
+            LoadedPlayback                 = true;
+            ReplayManager.IsWaymarkVisible = Service.Config.EnableWaymarks;
             return;
         }
 
@@ -100,14 +100,13 @@ public unsafe class PlaybackControlWindow : Window
         ImGuiOm.TooltipHover("以当前焦点目标进入观景视角");
 
         ImGui.SameLine();
-        var v = CoreManager.IsWaymarkVisible;
+        var v = ReplayManager.IsWaymarkVisible;
         if (ImGui.Button(v ? FontAwesomeIcon.ToggleOn.ToIconString() : FontAwesomeIcon.ToggleOff.ToIconString()))
         {
-            CoreManager.ToggleWaymarks();
-            Service.Config.EnableWaymarks ^= true;
+            ReplayManager.IsWaymarkVisible ^= true;
+            Service.Config.EnableWaymarks  ^= true;
             Service.Config.Save();
         }
-
         ImGuiOm.TooltipHover(v ? "隐藏场景标记" : "显示场景标记");
 
         ImGui.SameLine();
@@ -118,11 +117,11 @@ public unsafe class PlaybackControlWindow : Window
 
         const int restartDelayMS     = 12_000;
         var       sliderWidth        = ImGui.GetContentRegionAvail().X;
-        var       seekMS             = Math.Max((int)ContentsReplayModule.Instance()->Seek * 1000, (int)ContentsReplayModule.Instance()->chapters[0]->ms);
-        var       lastStartChapterMS = ContentsReplayModule.Instance()->chapters[FFXIVReplay.ChapterArray.FindPreviousChapterType(2)]->ms;
-        var       nextStartChapterMS = ContentsReplayModule.Instance()->chapters[FFXIVReplay.ChapterArray.FindNextChapterType(2)]->ms;
+        var       seekMS             = Math.Max((int)ContentsReplayModule.Instance()->Seek * 1000, (int)ContentsReplayModule.Instance()->ReplayChapters[0]->ms);
+        var       lastStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindPreviousChapterType(2)]->ms;
+        var       nextStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindNextChapterType(2)]->ms;
         if (lastStartChapterMS >= nextStartChapterMS)
-            nextStartChapterMS = ContentsReplayModule.Instance()->replayHeader.totalMS;
+            nextStartChapterMS = ContentsReplayModule.Instance()->ReplayHeader.TotalMS;
         var currentTime = new TimeSpan(0, 0, 0, 0, (int)(seekMS - lastStartChapterMS));
 
         using (ImRaii.ItemWidth(sliderWidth))
@@ -180,19 +179,16 @@ public unsafe class PlaybackControlWindow : Window
     {
         var save = false;
 
-        if (ImGui.Checkbox("隐藏自身名称 (需要重启录像)", ref Service.Config.EnableHideOwnName))
-        {
-            CoreManager.ReplaceLocalPlayerNamePatch.Toggle();
-            save = true;
-        }
-
         save |= ImGui.Checkbox("启用快捷章节跳转", ref Service.Config.EnableQuickLoad);
 
-        save |= ImGui.Checkbox("启用右键精准跳转", ref Service.Config.EnableJumpToTime);
-        ImGuiOm.TooltipHover("启用本项可能导致录像显示有误");
+        using (ImRaii.Group())
+        {
+            save |= ImGui.Checkbox("启用右键精准跳转", ref Service.Config.EnableJumpToTime);
 
-        ImGui.SameLine();
-        ImGui.TextColored(new(1, 1, 0, 1), FontAwesomeIcon.ExclamationTriangle.ToIconString());
+            ImGui.SameLine();
+            ImGui.TextColored(new(1, 1, 0, 1), FontAwesomeIcon.ExclamationTriangle.ToIconString());
+        }
+        ImGuiOm.TooltipHover("启用本项可能导致录像显示有误");
 
         ImGui.SetNextItemWidth(250f * ImGuiHelpers.GlobalScale);
         save |= ImGui.SliderFloat("加载速度", ref Service.Config.MaxSeekDelta, 100, 2000, "%.f%%");

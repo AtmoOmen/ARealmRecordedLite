@@ -4,6 +4,7 @@
     "Punchline": "A Realm Recorded 精简版",
     "Description": "使用 /record 指令打开配置界面\n如显示相关指令未解锁, 请去摩杜纳第七天堂找异国的诗人完成任务「回顾英雄诗篇」",
     "ApplicableVersion": "any",
+    "IconUrl": "https://raw.githubusercontent.com/goatcorp/PluginDistD17/main/stable/ARealmRecorded/images/icon.png",
     "Tags": [
         "ARealmRecordedLite",
         "ARealmRecorded",

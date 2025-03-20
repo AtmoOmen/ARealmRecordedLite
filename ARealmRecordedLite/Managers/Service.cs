@@ -21,14 +21,16 @@ public class Service
         Config.Init();
 
         FontManager.Init();
-        CoreManager.Init();
+        ReplayFileManager.Init();
+        ReplayManager.Init();
         WindowManager.Init();
     }
 
     public static void Uninit()
     {
         WindowManager.Uninit();
-        CoreManager.Uninit();
+        ReplayManager.Uninit();
+        ReplayFileManager.Uninit();
         FontManager.Uninit();
         
         Config.Uninit();
