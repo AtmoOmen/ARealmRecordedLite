@@ -106,9 +106,7 @@ public unsafe class CoreManager
     public static string DeletedFolder     => Path.Combine(ReplayFolder,                         "deleted");
 
     private static readonly HashSet<int> FlagsToIgnore = [201, 1981];
-
-    private static readonly HashSet<uint> WhitelistedContentTypes = [1, 2, 3, 4, 5, 9, 28, 29, 30, 37];
-
+    
     internal static void Init()
     {
         ReplayManager.Init();
@@ -257,11 +255,6 @@ public unsafe class CoreManager
     {
         var id = contentsReplayModule->initZonePacket.contentFinderCondition;
         if (id == 0) return;
-
-        if (!Service.Data.GetExcelSheet<ContentFinderCondition>().TryGetRow(id, out var contentFinderCondition)) return;
-
-        var contentType = contentFinderCondition.ContentType.RowId;
-        if (!WhitelistedContentTypes.Contains(contentType)) return;
 
         contentsReplayModule->FixNextReplaySaveSlot(Service.Config.MaxAutoRenamedReplays);
         InitializeRecordingHook.Original(contentsReplayModule);
