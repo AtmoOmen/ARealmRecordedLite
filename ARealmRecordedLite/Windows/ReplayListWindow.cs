@@ -89,13 +89,6 @@ public unsafe partial class ReplayListWindow : Window
                 Service.GameConfig.UiConfig.Set(nameof(UiConfigOption.ContentsReplayEnable), true);
         }
 
-        ImGui.SameLine();
-        if (ImGui.Button("加载录像"))
-        {
-            ReplayManager.LoadReplay(ReplayFileManager.LastSelectedReplay);
-            ContentsReplayModule.Instance()->SetChapter(0);
-        }
-
         if (!ShowPluginSettings)
             DrawReplaysTable();
         else

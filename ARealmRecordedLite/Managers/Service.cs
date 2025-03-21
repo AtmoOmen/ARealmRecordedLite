@@ -21,6 +21,7 @@ public class Service
         Config.Init();
 
         FontManager.Init();
+        ReplayPacketManager.Init();
         ReplayFileManager.Init();
         ReplayManager.Init();
         WindowManager.Init();
@@ -31,6 +32,7 @@ public class Service
         WindowManager.Uninit();
         ReplayManager.Uninit();
         ReplayFileManager.Uninit();
+        ReplayPacketManager.Uninit();
         FontManager.Uninit();
         
         Config.Uninit();
@@ -39,7 +41,6 @@ public class Service
     }
 
     public static Configuration  Config         { get; private set; } = null!;
-    public static WindowManager  WindowManager  { get; private set; } = new();
     
     [PluginService] public static IAddonLifecycle      AddonLifecycle { get; private set; } = null!;
     [PluginService] public static IClientState         ClientState    { get; private set; } = null!;

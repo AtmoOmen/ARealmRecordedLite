@@ -10,7 +10,7 @@ public class WindowManager
 {
     public static WindowSystem? WindowSystem { get; private set; }
 
-    internal void Init()
+    internal static void Init()
     {
         WindowSystem ??= new WindowSystem(PluginName);
         WindowSystem.RemoveAllWindows();
@@ -55,7 +55,7 @@ public class WindowManager
     public static T? Get<T>() where T : Window
         => WindowSystem?.Windows.FirstOrDefault(x => x.GetType() == typeof(T)) as T;
 
-    internal void Uninit()
+    internal static void Uninit()
     {
         Service.UiBuilder.Draw -= DrawWindows;
         Service.UiBuilder.OpenMainUi -= ToggleMainWindow;
