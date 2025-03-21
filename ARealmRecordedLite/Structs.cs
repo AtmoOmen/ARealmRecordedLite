@@ -338,14 +338,14 @@ public unsafe struct FFXIVReplay
     [StructLayout(LayoutKind.Explicit, Size = 0x4 + (0xC * 64))]
     public struct ChapterArray
     {
-        [FieldOffset(0x0)] public int length;
+        [FieldOffset(0x0)] public int Length;
 
         [StructLayout(LayoutKind.Sequential, Size = 0xC)]
         public struct Chapter
         {
-            public int  type;
-            public uint offset;
-            public uint ms;
+            public int  Type;
+            public uint Offset;
+            public uint MS;
         }
 
         public Chapter* this[int i]
@@ -362,8 +362,8 @@ public unsafe struct FFXIVReplay
         
         public byte FindPreviousChapterFromTime(uint ms)
         {
-            for (var i = (byte)(length - 1); i > 0; i--)
-                if (this[i]->ms <= ms) return i;
+            for (var i = (byte)(Length - 1); i > 0; i--)
+                if (this[i]->MS <= ms) return i;
             
             return 0;
         }
@@ -371,7 +371,7 @@ public unsafe struct FFXIVReplay
         public byte FindPreviousChapterType(byte chapter, byte type)
         {
             for (var i = chapter; i > 0; i--)
-                if (this[i]->type == type) return i;
+                if (this[i]->Type == type) return i;
             
             return 0;
         }
@@ -381,8 +381,8 @@ public unsafe struct FFXIVReplay
         
         public byte FindNextChapterType(byte chapter, byte type)
         {
-            for (var i = ++chapter; i < length; i++)
-                if (this[i]->type == type) return i;
+            for (var i = ++chapter; i < Length; i++)
+                if (this[i]->Type == type) return i;
             
             return 0;
         }
@@ -394,12 +394,12 @@ public unsafe struct FFXIVReplay
     [StructLayout(LayoutKind.Sequential)]
     public struct DataSegment
     {
-        public ushort opcode;
-        public ushort dataLength;
-        public uint ms;
-        public uint objectID;
+        public ushort Opcode;
+        public ushort DataLength;
+        public uint   MS;
+        public uint   ObjectID;
 
-        public uint Length => (uint)sizeof(DataSegment) + dataLength;
+        public uint Length => (uint)sizeof(DataSegment) + DataLength;
 
         public byte* Data
         {
@@ -432,34 +432,34 @@ public unsafe struct FFXIVReplay
         DataSegment* segment;
         while ((segment = GetDataSegment(offset)) != null)
         {
-            if (segment->ms >= ms) return segment;
+            if (segment->MS >= ms) return segment;
             offset += segment->Length;
         }
 
         return null;
     }
     
-    public (int pulls, TimeSpan longestPull) GetPullInfo()
+    public (int Pulls, TimeSpan LongestPulls) GetPullInfo()
     {
         var pulls       = 0;
         var longestPull = TimeSpan.Zero;
-        for (byte j = 0; j < ReplayChapters.length; j++)
+        for (byte j = 0; j < ReplayChapters.Length; j++)
         {
             var chapter = ReplayChapters[j];
-            if (chapter->type != 2 && j != 0) continue;
+            if (chapter->Type != 2 && j != 0) continue;
 
-            if (j < ReplayChapters.length - 1)
+            if (j < ReplayChapters.Length - 1)
             {
                 var nextChapter = ReplayChapters[j + 1];
-                if (nextChapter->type == 1)
+                if (nextChapter->Type == 1)
                 {
                     chapter = nextChapter;
                     j++;
                 }
             }
 
-            var nextStartMS = ReplayChapters.FindNextChapterType(j, 2) is var nextStart && nextStart > 0 ? ReplayChapters[nextStart]->ms : ReplayHeader.TotalMS;
-            var ms          = (int)(nextStartMS - chapter->ms);
+            var nextStartMS = ReplayChapters.FindNextChapterType(j, 2) is var nextStart && nextStart > 0 ? ReplayChapters[nextStart]->MS : ReplayHeader.TotalMS;
+            var ms          = (int)(nextStartMS - chapter->MS);
             if (ms > 30_000) pulls++;
 
             var timeSpan = new TimeSpan(0, 0, 0, 0, ms);

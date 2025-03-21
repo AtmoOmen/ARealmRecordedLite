@@ -80,7 +80,7 @@ public unsafe partial class ReplayFileManager
         }
         catch (Exception e)
         {
-            Service.Log.Error(e, $"Failed to read replay {path}");
+            Service.Log.Error(e, $"无法读取回放: {path}");
 
             if (allocated)
             {
@@ -96,16 +96,19 @@ public unsafe partial class ReplayFileManager
     {
         try
         {
-            using var fs    = File.OpenRead(path);
-            var       size  = sizeof(FFXIVReplay.Header) + sizeof(FFXIVReplay.ChapterArray);
-            var       bytes = new byte[size];
+            using var fs = File.OpenRead(path);
+            
+            var size  = sizeof(FFXIVReplay.Header) + sizeof(FFXIVReplay.ChapterArray);
+            var bytes = new byte[size];
             if (fs.Read(bytes, 0, size) != size)
                 return null;
-            fixed (byte* ptr = bytes) { return *(FFXIVReplay*)ptr; }
+
+            fixed (byte* ptr = bytes)
+                return *(FFXIVReplay*)ptr;
         }
         catch (Exception e)
         {
-            Service.Log.Error(e, $"Failed to read replay header and chapters {path}");
+            Service.Log.Error(e, $"无法读取回放 {path}");
             return null;
         }
     }

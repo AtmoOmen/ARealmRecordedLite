@@ -39,7 +39,7 @@ public static unsafe class ReplayPacketManager
 
     public static bool ReplayPacket(FFXIVReplay.DataSegment* segment, byte* data)
     {
-        if (!CustomPackets.TryGetValue(segment->opcode, out var packet)) return false;
+        if (!CustomPackets.TryGetValue(segment->Opcode, out var packet)) return false;
 
         packet.Replay(segment, data);
         return true;

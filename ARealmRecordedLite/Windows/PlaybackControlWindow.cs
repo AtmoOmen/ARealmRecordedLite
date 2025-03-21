@@ -117,9 +117,9 @@ public unsafe class PlaybackControlWindow : Window
 
         const int restartDelayMS     = 12_000;
         var       sliderWidth        = ImGui.GetContentRegionAvail().X;
-        var       seekMS             = Math.Max((int)ContentsReplayModule.Instance()->Seek * 1000, (int)ContentsReplayModule.Instance()->ReplayChapters[0]->ms);
-        var       lastStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindPreviousChapterType(2)]->ms;
-        var       nextStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindNextChapterType(2)]->ms;
+        var       seekMS             = Math.Max((int)ContentsReplayModule.Instance()->Seek * 1000, (int)ContentsReplayModule.Instance()->ReplayChapters[0]->MS);
+        var       lastStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindPreviousChapterType(2)]->MS;
+        var       nextStartChapterMS = ContentsReplayModule.Instance()->ReplayChapters[FFXIVReplay.ChapterArray.FindNextChapterType(2)]->MS;
         if (lastStartChapterMS >= nextStartChapterMS)
             nextStartChapterMS = ContentsReplayModule.Instance()->ReplayHeader.TotalMS;
         var currentTime = new TimeSpan(0, 0, 0, 0, (int)(seekMS - lastStartChapterMS));

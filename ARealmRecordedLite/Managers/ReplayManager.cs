@@ -348,8 +348,8 @@ public static unsafe class ReplayManager
         ReplayFileManager.UpdateAutoRename();
 
         if (contentsReplayModule->IsRecording &&
-            contentsReplayModule->ReplayChapters[0]->type == 1)
-            contentsReplayModule->ReplayChapters[0]->type = 5;
+            contentsReplayModule->ReplayChapters[0]->Type == 1)
+            contentsReplayModule->ReplayChapters[0]->Type = 5;
 
         if (!contentsReplayModule->InPlayback) return;
 
@@ -377,8 +377,8 @@ public static unsafe class ReplayManager
         {
             if (a3 > 64 || addonSheetRow != 3079 || !Service.PI.UiBuilder.ShouldModifyUi) return ret;
 
-            var currentChapterMS = ContentsReplayModule.Instance()->ReplayChapters[a3 - 1]->ms;
-            var nextChapterMS    = a3 < 64 ? ContentsReplayModule.Instance()->ReplayChapters[a3]->ms : ContentsReplayModule.Instance()->ReplayHeader.TotalMS;
+            var currentChapterMS = ContentsReplayModule.Instance()->ReplayChapters[a3 - 1]->MS;
+            var nextChapterMS    = a3 < 64 ? ContentsReplayModule.Instance()->ReplayChapters[a3]->MS : ContentsReplayModule.Instance()->ReplayHeader.TotalMS;
             if (nextChapterMS < currentChapterMS)
                 nextChapterMS = ContentsReplayModule.Instance()->ReplayHeader.TotalMS;
 
@@ -448,7 +448,7 @@ public static unsafe class ReplayManager
 
         if (QuickLoadChapter < 2) return;
 
-        var seekedTime = contentsReplayModule->ReplayChapters[SeekingChapter]->ms;
+        var seekedTime = contentsReplayModule->ReplayChapters[SeekingChapter]->MS;
         if (seekedTime > (int)(contentsReplayModule->Seek * 1000)) return;
 
         DoQuickLoad();
@@ -476,7 +476,7 @@ public static unsafe class ReplayManager
     {
         if (!Service.Config.EnableQuickLoad                    ||
             chapter                                      <= 0 ||
-            contentsReplayModule->ReplayChapters.length        < 2  ||
+            contentsReplayModule->ReplayChapters.Length        < 2  ||
             ContentsReplayModule.GetCurrentChapter() + 1 == chapter)
             return;
 
@@ -495,10 +495,11 @@ public static unsafe class ReplayManager
         if (LoadedReplay != null)
             Marshal.FreeHGlobal((nint)LoadedReplay);
 
-        LoadedReplay                                  = newReplay;
-        ContentsReplayModule.Instance()->ReplayHeader = LoadedReplay->ReplayHeader;
-        ContentsReplayModule.Instance()->ReplayChapters     = LoadedReplay->ReplayChapters;
-        ContentsReplayModule.Instance()->DataLoadType = 0;
+        LoadedReplay = newReplay;
+        
+        ContentsReplayModule.Instance()->ReplayHeader   = LoadedReplay->ReplayHeader;
+        ContentsReplayModule.Instance()->ReplayChapters = LoadedReplay->ReplayChapters;
+        ContentsReplayModule.Instance()->DataLoadType   = 0;
 
         Service.Config.LastLoadedReplay = path;
         return true;
@@ -518,8 +519,8 @@ public static unsafe class ReplayManager
         var jumpChapter = ContentsReplayModule.Instance()->ReplayChapters[chapter];
         if (jumpChapter == null) return;
 
-        ContentsReplayModule.Instance()->OverallDataOffset = jumpChapter->offset;
-        ContentsReplayModule.Instance()->Seek              = jumpChapter->ms / 1000f;
+        ContentsReplayModule.Instance()->OverallDataOffset = jumpChapter->Offset;
+        ContentsReplayModule.Instance()->Seek              = jumpChapter->MS / 1000f;
     }
 
     public static void JumpToTime(uint ms)
@@ -528,7 +529,7 @@ public static unsafe class ReplayManager
         if (segment == null) return;
 
         ContentsReplayModule.Instance()->OverallDataOffset = offset;
-        ContentsReplayModule.Instance()->Seek              = segment->ms / 1000f;
+        ContentsReplayModule.Instance()->Seek              = segment->MS / 1000f;
     }
 
     public static void JumpToTimeBeforeChapter(byte chapter, uint ms)
@@ -536,7 +537,7 @@ public static unsafe class ReplayManager
         var jumpChapter = ContentsReplayModule.Instance()->ReplayChapters[chapter];
         if (jumpChapter == null) return;
 
-        JumpToTime(jumpChapter->ms > ms ? jumpChapter->ms - ms : 0);
+        JumpToTime(jumpChapter->MS > ms ? jumpChapter->MS - ms : 0);
     }
 
     public static void SeekToTime(uint ms)
@@ -549,7 +550,7 @@ public static unsafe class ReplayManager
 
         SeekingOffset = offset;
         ForceFastForwardPatch.Enable();
-        if ((int)(ContentsReplayModule.Instance()->Seek * 1000) < segment->ms && prevChapter == ContentsReplayModule.GetCurrentChapter())
+        if ((int)(ContentsReplayModule.Instance()->Seek * 1000) < segment->MS && prevChapter == ContentsReplayModule.GetCurrentChapter())
             OnSetChapterHook.Original(ContentsReplayModule.Instance(), prevChapter);
         else
             ContentsReplayModule.Instance()->SetChapter(prevChapter);
@@ -557,7 +558,7 @@ public static unsafe class ReplayManager
 
     public static void ReplaySection(byte from, byte to)
     {
-        if (from != 0 && ContentsReplayModule.Instance()->OverallDataOffset < ContentsReplayModule.Instance()->ReplayChapters[from]->offset)
+        if (from != 0 && ContentsReplayModule.Instance()->OverallDataOffset < ContentsReplayModule.Instance()->ReplayChapters[from]->Offset)
             JumpToChapter(from);
 
         SeekingChapter = to;
