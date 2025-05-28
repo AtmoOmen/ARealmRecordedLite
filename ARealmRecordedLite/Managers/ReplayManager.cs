@@ -8,8 +8,10 @@ using Dalamud.Game.Config;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using Lumina.Excel.Sheets;
 using MemoryPatch = ARealmRecordedLite.Utilities.MemoryPatch;
 
 namespace ARealmRecordedLite.Managers;
@@ -281,14 +283,18 @@ public static unsafe class ReplayManager
 
         if ((contentsReplayModule->Status & 1) == 0) return;
 
-        if (Service.GameConfig.UiConfig.TryGetBool(nameof(UiConfigOption.CutsceneSkipIsContents), out var b) && b)
-            InitializeRecordingDetour(contentsReplayModule);
+        InitializeRecordingDetour(contentsReplayModule);
     }
 
     private static void InitializeRecordingDetour(ContentsReplayModule* contentsReplayModule)
     {
-        var id = contentsReplayModule->InitZonePacketData.ContentFinderCondition;
-        if (id == 0) return;
+        var zoneID = contentsReplayModule->InitZonePacketData.TerritoryType;
+        if (zoneID == 0) return;
+        
+        var contentID = Service.Data.GetExcelSheet<TerritoryType>().GetRow(zoneID).ContentFinderCondition.RowId;
+        if (contentID == 0) return;
+        
+        contentsReplayModule->InitZonePacketData.ContentFinderCondition = (ushort)contentID;
 
         contentsReplayModule->FixNextReplaySaveSlot(Service.Config.MaxAutoRenamedReplays);
         InitializeRecordingHook.Original(contentsReplayModule);

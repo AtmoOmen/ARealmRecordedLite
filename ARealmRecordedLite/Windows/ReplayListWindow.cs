@@ -61,7 +61,6 @@ public unsafe partial class ReplayListWindow : Window
             ReplayFileManager.GetReplayList();
             NeedSort = true;
         }
-
         ImGuiOm.TooltipHover("重新排序");
 
         ImGui.SameLine();
