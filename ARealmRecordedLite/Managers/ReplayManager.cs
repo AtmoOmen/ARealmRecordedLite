@@ -85,7 +85,7 @@ public static unsafe class ReplayManager
     private static readonly CompSig WaymarkToggleSig = new("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? EB 3B");
     private static          byte*   waymarkToggle;
 
-    private static readonly CompSig ContentDirectorOffsetSig = new("F6 81 7C 0D 00 00 01 75 74");
+    private static readonly CompSig ContentDirectorOffsetSig = new("F6 81 ?? ?? ?? ?? ?? 75 ?? 85 FF 75");
     private static          short   contentDirectorOffset;
 
     private static readonly CompSig DisplaySelectedDutyRecordingSig = new("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 39 6E 34");
