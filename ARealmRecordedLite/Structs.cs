@@ -141,7 +141,7 @@ public unsafe struct ContentsReplayModule
     }
     
 
-    public static readonly CompSig               EndRecordingSig = new("E8 ?? ?? ?? ?? 32 C0 EB A3");
+    public static readonly CompSig               EndRecordingSig = new("E8 ?? ?? ?? ?? 32 C0 EB B2");
     public delegate        void                  EndRecordingDelegate(ContentsReplayModule* contentsReplayModule);
     private static         EndRecordingDelegate? endRecording;
     
@@ -153,7 +153,7 @@ public unsafe struct ContentsReplayModule
     }
 
 
-    public static readonly CompSig                 OnZoneInPacketSig = new("E8 ?? ?? ?? ?? 45 33 C0 48 8D 56 10 8B CF E8 ?? ?? ?? ?? 48 8D 4E 6C");
+    public static readonly CompSig                 OnZoneInPacketSig = new("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 8B F2 48 8B D9 E8 ?? ?? ?? ?? F6 83");
     public delegate        void                    OnZoneInPacketDelegate(ContentsReplayModule* contentsReplayModule, uint objectID, nint packet);
     private static         OnZoneInPacketDelegate? onZoneInPacket;
 

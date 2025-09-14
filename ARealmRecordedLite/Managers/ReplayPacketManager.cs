@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using ARealmRecordedLite.Utilities;
 using Dalamud.Hooking;
 using Dalamud.Memory;
-using CompSig = ARealmRecordedLite.Utilities.CompSig;
 
 namespace ARealmRecordedLite.Managers;
 

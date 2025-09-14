@@ -26,7 +26,7 @@ public static unsafe class ReplayManager
         new("BA CB 07 00 00 48 8B CF E8", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
 
     private static readonly MemoryPatch AlwaysRecordPatch =
-        new("24 06 3C 02 75 23 48", [0xEB, 0x1F]);
+        new("24 ?? 3C ?? 75 ?? 48 8B 0D ?? ?? ?? ?? BA", [0xEB, 0x1F]);
 
     private static readonly MemoryPatch SeIsABunchOfClownsPatch =
         new("F6 40 78 02 74 04 B0 01 EB 02 32 C0 40 84 FF", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
@@ -41,7 +41,7 @@ public static unsafe class ReplayManager
         new("75 ?? 48 8D 4C 24 ?? E8 ?? ?? ?? ?? F6 05", [0x90, 0x90]);
     
     private static readonly MemoryPatch RemoveProcessingLimitPatch =
-        new("41 FF C4 48 39 43 38", [0x90, 0x90, 0x90]);
+        new("41 FF C7 48 39 43", [0x90, 0x90, 0x90]);
 
     private static readonly MemoryPatch RemoveProcessingLimitPatch2 =
         new("0F 87 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 F6", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
@@ -63,7 +63,7 @@ public static unsafe class ReplayManager
     private delegate        void    OnSetChapterDelegate(ContentsReplayModule* contentsReplayModule, byte chapter);
     private static          Hook<OnSetChapterDelegate>? OnSetChapterHook;
     
-    private static readonly CompSig FormatAddonTextTimestampSig = new("E8 ?? ?? ?? ?? 8D 4D 64");
+    private static readonly CompSig FormatAddonTextTimestampSig = new("E8 ?? ?? ?? ?? 48 8B D0 8D 4F 0E");
     public delegate nint FormatAddonTextTimestampDelegate(
         nint raptureTextModule, uint addonSheetRow, int a3, uint hours, uint minutes, uint seconds, uint a7);
     private static Hook<FormatAddonTextTimestampDelegate>? FormatAddonTextTimestampHook;
