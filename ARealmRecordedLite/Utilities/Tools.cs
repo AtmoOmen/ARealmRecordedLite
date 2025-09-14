@@ -37,7 +37,7 @@ public static unsafe class Tools
         var a = Service.Gui.GetAddonByName(addonName);
         if (a == nint.Zero) return null;
 
-        return (T*)a;
+        return (T*)a.Address;
     }
 
     public static bool IsAddonAndNodesReady(AtkUnitBase* UI) =>

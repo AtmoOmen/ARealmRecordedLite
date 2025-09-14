@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Numerics;
 using ARealmRecordedLite.Managers;
 using ARealmRecordedLite.Utilities;
@@ -10,7 +11,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace ARealmRecordedLite.Windows;
 
@@ -186,7 +187,7 @@ public unsafe class PlaybackControlWindow : Window
             save |= ImGui.Checkbox("启用右键精准跳转", ref Service.Config.EnableJumpToTime);
 
             ImGui.SameLine();
-            ImGui.TextColored(new(1, 1, 0, 1), FontAwesomeIcon.ExclamationTriangle.ToIconString());
+            ImGui.TextColored(KnownColor.Yellow.Vector(), FontAwesomeIcon.ExclamationTriangle.ToIconString());
         }
         ImGuiOm.TooltipHover("启用本项可能导致录像显示有误");
 
@@ -212,9 +213,7 @@ public unsafe class PlaybackControlWindow : Window
         };
     }
 
-    public void Dispose()
-    {
+    public void Dispose() => 
         Service.AddonLifecycle.UnregisterListener(OnAddon);
-    }
 }
 

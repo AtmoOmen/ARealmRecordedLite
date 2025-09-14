@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
 
 namespace ARealmRecordedLite.Managers;
 
@@ -15,27 +15,28 @@ public class FontManager
     private static readonly Lazy<IFontAtlas> FontAtlasLazy = 
         new(() => Service.PI.UiBuilder.CreateFontAtlas(FontAtlasAutoRebuildMode.Disable));
 
-    private static readonly Lazy<ushort[]> FontRangeLazy = new(() => BuildRange(null,
-        ImGui.GetIO().Fonts.GetGlyphRangesChineseFull(),
-        ImGui.GetIO().Fonts.GetGlyphRangesJapanese(),
-        ImGui.GetIO().Fonts.GetGlyphRangesKorean(),
-        ImGui.GetIO().Fonts.GetGlyphRangesDefault()));
+    public static unsafe ushort[] DefaultFontRange { get; } =
+        BuildRange(null, 
+                   ImGui.GetIO().Fonts.GetGlyphRangesChineseFull(),
+                   ImGui.GetIO().Fonts.GetGlyphRangesJapanese(),
+                   ImGui.GetIO().Fonts.GetGlyphRangesKorean(),
+                   ImGui.GetIO().Fonts.GetGlyphRangesDefault());
 
-    private static readonly Lazy<IFontHandle> DefaultFontLazy = new(() =>
-        FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis18)));
+    private static readonly Lazy<IFontHandle> DefaultFontLazy = 
+        new(() => FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis18)));
 
     private static IFontHandle? uiFont;
     
     public static IFontAtlas FontAtlas => FontAtlasLazy.Value;
-    public static ushort[] FontRange => FontRangeLazy.Value;
     
     public static IFontHandle UIFont => uiFont ?? DefaultFontLazy.Value;
     
     private static string DefaultFontPath => Path.Join(Service.PI.DalamudAssetDirectory.FullName, "UIRes",
-                                                     Service.ClientState.ClientLanguage == (ClientLanguage)4 ? 
-                                                         "NotoSansCJKsc-Medium.otf" : "NotoSansCJKjp-Medium.otf");
+                                                       Service.ClientState.ClientLanguage == (ClientLanguage)4 ? 
+                                                           "NotoSansCJKsc-Medium.otf" : "NotoSansCJKjp-Medium.otf");
 
-    internal static void Init() => Task.Run(async () => uiFont = await CreateFontHandleAsync(20f));
+    internal static void Init() => 
+        Task.Run(async () => uiFont = await CreateFontHandleAsync(20f));
 
     private static async Task<IFontHandle> CreateFontHandleAsync(float size)
     {
@@ -48,7 +49,7 @@ public class FontManager
             {
                 e.OnPreBuild(tk =>
                 {
-                    var fileFontPtr = tk.AddDalamudDefaultFont(size, FontRange);
+                    var fileFontPtr = tk.AddDalamudDefaultFont(size, DefaultFontRange);
 
                     var mixedFontPtr0 = tk.AddGameSymbol(new()
                     {
@@ -76,7 +77,7 @@ public class FontManager
                     {
                         SizePx      = size,
                         PixelSnapH  = true,
-                        GlyphRanges = FontRange,
+                        GlyphRanges = DefaultFontRange,
                         FontNo      = 0,
                     });
 
@@ -101,9 +102,9 @@ public class FontManager
         return handle;
     }
 
-    private static unsafe ushort[] BuildRange(IReadOnlyList<ushort>? chars, params nint[] ranges)
+    private static unsafe ushort[] BuildRange(IReadOnlyList<ushort>? chars, params ushort*[] ranges)
     {
-        var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+        var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder());
         foreach (var range in ranges)
             builder.AddRanges(range);
 
@@ -130,6 +131,7 @@ public class FontManager
         return builder.BuildRangesToArray();
     }
     
-    internal static void Uninit() => uiFont = null;
+    internal static void Uninit() => 
+        uiFont = null;
 }
 

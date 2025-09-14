@@ -14,7 +14,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace ARealmRecordedLite.Windows;
 
@@ -191,14 +191,14 @@ public unsafe partial class ReplayListWindow : Window
                                 ImGui.TextUnformatted($"  [ ");
 
                                 ImGui.SameLine();
-                                ImGui.Image(texture.GetWrapOrEmpty().ImGuiHandle, new(ImGui.GetTextLineHeightWithSpacing()));
+                                ImGui.Image(texture.GetWrapOrEmpty().Handle, new(ImGui.GetTextLineHeightWithSpacing()));
 
                                 ImGui.SameLine();
                                 ImGui.TextUnformatted($" ]  ");
 
                                 foundPlayer = true;
                             }
-                            else { ImGui.Image(texture.GetWrapOrEmpty().ImGuiHandle, new(ImGui.GetTextLineHeight())); }
+                            else { ImGui.Image(texture.GetWrapOrEmpty().Handle, new(ImGui.GetTextLineHeight())); }
                         }
 
                         ImGui.TextUnformatted($"长度: {new TimeSpan(0, 0, 0, 0, (int)header.DisplayedMS):hh':'mm':'ss}");
@@ -212,7 +212,7 @@ public unsafe partial class ReplayListWindow : Window
                     ImGui.EndTooltip();
                 }
 
-                if (ImGui.BeginPopupContextItem())
+                if (ImGui.BeginPopupContextItem("ReplyContextMenu"))
                 {
                     for (byte j = 0; j < 3; j++)
                     {
