@@ -26,7 +26,7 @@ public static unsafe class ReplayManager
         new("BA CB 07 00 00 48 8B CF E8", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
 
     private static readonly MemoryPatch AlwaysRecordPatch =
-        new("24 ?? 3C ?? 75 ?? 48 8B 0D ?? ?? ?? ?? BA", [0xEB, 0x1F]);
+        new("24 ?? 3C ?? 75 ?? 48 8B 0D ?? ?? ?? ?? BA", [0xEB, 0x25]);
 
     private static readonly MemoryPatch SeIsABunchOfClownsPatch =
         new("F6 40 78 02 74 04 B0 01 EB 02 32 C0 40 84 FF", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
