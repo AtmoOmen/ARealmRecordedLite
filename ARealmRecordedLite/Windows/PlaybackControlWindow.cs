@@ -12,6 +12,7 @@ using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 namespace ARealmRecordedLite.Windows;
 
@@ -97,7 +98,7 @@ public unsafe class PlaybackControlWindow : Window
 
         ImGui.SameLine();
         if (ImGui.Button(FontAwesomeIcon.Video.ToIconString()))
-            Framework.Instance()->GetUIModule()->EnterIdleCam(0, Service.Targets.FocusTarget is { } focus ? focus.GameObjectId : 0xE0000000);
+            Framework.Instance()->GetUIModule()->EnterIdleCam(0, TargetSystem.Instance()->FocusTarget != null ? TargetSystem.Instance()->FocusTarget->GetGameObjectId() : 0xE0000000);
         ImGuiOm.TooltipHover("以当前焦点目标进入观景视角");
 
         ImGui.SameLine();

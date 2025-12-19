@@ -44,7 +44,7 @@ public unsafe partial class ReplayFileManager
         ContentsReplayModule.SetSavedReplayCIDs();
     }
 
-    public static string GetReplaySlotName(int slot) => $"FFXIV_{Service.ClientState.LocalContentId:X16}_{slot:D3}.dat";
+    public static string GetReplaySlotName(int slot) => $"FFXIV_{Service.PlayerState.ContentId:X16}_{slot:D3}.dat";
 
     public static void UpdateAutoRename()
     {
@@ -290,7 +290,7 @@ public unsafe partial class ReplayFileManager
 
     public static void SetDutyRecorderMenuSelection(nint agent, string path, FFXIVReplay.Header header)
     {
-        header.LocalCID    = Service.ClientState.LocalContentId;
+        header.LocalCID    = Service.PlayerState.ContentId;
         LastSelectedReplay = path;
         LastSelectedHeader = header;
 
@@ -311,7 +311,7 @@ public unsafe partial class ReplayFileManager
         {
             file.CopyTo(Path.Combine(ReplayFolder, GetReplaySlotName(slot)), true);
 
-            header.LocalCID = Service.ClientState.LocalContentId;
+            header.LocalCID = Service.PlayerState.ContentId;
 
             ContentsReplayModule.Instance()->SavedReplayHeaders[slot] = header;
             SetDutyRecorderMenuSelection(agent, slot);

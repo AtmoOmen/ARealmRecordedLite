@@ -44,6 +44,7 @@ public class Service
     
     [PluginService] public static IAddonLifecycle      AddonLifecycle { get; private set; } = null!;
     [PluginService] public static IClientState         ClientState    { get; private set; } = null!;
+    [PluginService] public static IPlayerState         PlayerState    { get; private set; } = null!;
     [PluginService] public static ICondition           Condition      { get; private set; } = null!;
     [PluginService] public static IDataManager         Data           { get; private set; } = null!;
     [PluginService] public static IFramework           Framework      { get; private set; } = null!;
@@ -51,7 +52,6 @@ public class Service
     [PluginService] public static IGameGui             Gui            { get; private set; } = null!;
     [PluginService] public static IGameInteropProvider Hook           { get; private set; } = null!;
     [PluginService] public static IPluginLog           Log            { get; private set; } = null!;
-    [PluginService] public static ITargetManager       Targets        { get; private set; } = null!;
     [PluginService] public static ITextureProvider     Texture        { get; private set; } = null!;
     [PluginService] public static IToastGui            Toast          { get; private set; } = null!;
 
