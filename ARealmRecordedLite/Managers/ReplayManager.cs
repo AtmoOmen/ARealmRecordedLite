@@ -29,7 +29,7 @@ public static unsafe class ReplayManager
         new("24 ?? 3C ?? 75 ?? 48 8B 0D ?? ?? ?? ?? BA", [0xEB, 0x25]);
 
     private static readonly MemoryPatch SeIsABunchOfClownsPatch =
-        new("F6 40 ?? ?? 74 ?? B0 ?? EB ?? 32 C0 40 84 FF", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
+        new("F6 40 ?? 02 74 04 B0 01 EB 02 32 C0 40 84 FF", [0x90, 0x90, 0x90, 0x90, 0x90, 0x90]);
 
     private static readonly MemoryPatch InstantFadeOutPatch =
         new("44 8D 47 0A 33 D2", [null, null, 0x07, 0x90]);

@@ -56,7 +56,7 @@ public unsafe class PlaybackControlWindow : Window
 
         if (!LoadedPlayback)
         {
-            if (ContentsReplayModule.Instance()->Unknown0x708 != 0)
+            if (ContentsReplayModule.Instance()->Unknown0x720 != 0)
             {
                 ImGui.Text("录像加载中...");
                 LoadingPlayback = true;

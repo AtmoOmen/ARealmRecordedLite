@@ -26,7 +26,7 @@ public unsafe struct ContentsReplayModule
     {
         if (Instance()->SavedReplayHeaders == null) return;
 
-        // 始终为 0 避免信息泄露
+
         const ulong contentID = 0;
 
         for (var i = 0; i < 3; i++)
@@ -89,20 +89,20 @@ public unsafe struct ContentsReplayModule
     [FieldOffset(0x5C8)] public byte                     Unknown0x5C8;
     [FieldOffset(0x5CC)] public uint                     LocalPlayerObjectID;
     [FieldOffset(0x5D0)] public InitZonePacket           InitZonePacketData;
-    [FieldOffset(0x640)] public long                     Unknown0x640;
-    [FieldOffset(0x648)] public UnknownPacket            Unknown0x648;
-    [FieldOffset(0x708)] public int                      Unknown0x708;
-    [FieldOffset(0x70C)] public float                    Seek;
-    [FieldOffset(0x710)] public float                    SeekDelta;
-    [FieldOffset(0x714)] public float                    Speed;
-    [FieldOffset(0x718)] public float                    Unknown0x718;
-    [FieldOffset(0x71C)] public byte                     SelectedChapter;
-    [FieldOffset(0x720)] public uint                     StartingMS;
-    [FieldOffset(0x724)] public int                      Unknown0x724;
-    [FieldOffset(0x728)] public short                    Unknown0x728;
-    [FieldOffset(0x72A)] public byte                     Status;
-    [FieldOffset(0x72B)] public byte                     PlaybackControls;
-    [FieldOffset(0x72C)] public byte                     Unknown0x72C;
+    [FieldOffset(0x658)] public long                     Unknown0x658;
+    [FieldOffset(0x660)] public UnknownPacket            Unknown0x660;
+    [FieldOffset(0x720)] public int                      Unknown0x720;
+    [FieldOffset(0x724)] public float                    Seek;
+    [FieldOffset(0x728)] public float                    SeekDelta;
+    [FieldOffset(0x72C)] public float                    Speed;
+    [FieldOffset(0x730)] public float                    Unknown0x730;
+    [FieldOffset(0x734)] public byte                     SelectedChapter;
+    [FieldOffset(0x738)] public uint                     StartingMS;
+    [FieldOffset(0x73C)] public int                      Unknown0x73C;
+    [FieldOffset(0x740)] public short                    Unknown0x740;
+    [FieldOffset(0x742)] public byte                     Status;
+    [FieldOffset(0x743)] public byte                     PlaybackControls;
+    [FieldOffset(0x744)] public byte                     Unknown0x744;
 
     public bool InPlayback       => (PlaybackControls & 4)    != 0;
     public bool IsPaused         => (PlaybackControls & 8)    != 0;
@@ -153,7 +153,7 @@ public unsafe struct ContentsReplayModule
     }
 
 
-    public static readonly CompSig                 OnZoneInPacketSig = new("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 8B F2 48 8B D9 E8 ?? ?? ?? ?? F6 83");
+    public static readonly CompSig                 OnZoneInPacketSig = new("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 49 8B F8 8B F2 48 8B D9 E8 ?? ?? ?? ?? F6 83");
     public delegate        void                    OnZoneInPacketDelegate(ContentsReplayModule* contentsReplayModule, uint objectID, nint packet);
     private static         OnZoneInPacketDelegate? onZoneInPacket;
 

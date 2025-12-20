@@ -155,8 +155,9 @@ public unsafe partial class ReplayListWindow : Window
             {
                 using (ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled), !isPlayable))
                 {
-                    if (ImGui.Selectable(autoRenamed ? $"- {displayName}##{path}" : $"{displayName}##{path}",
-                                         path == ReplayFileManager.LastSelectedReplay && *(byte*)((nint)agent + 0x2C) == 100,
+                    if (ImGui.Selectable($"{displayName}##{path}",
+                                         path                         == ReplayFileManager.LastSelectedReplay &&
+                                         *(byte*)((nint)agent + 0x2C) == 100,
                                          ImGuiSelectableFlags.SpanAllColumns))
                         ReplayFileManager.SetDutyRecorderMenuSelection((nint)agent, path, header);
                 }
@@ -212,7 +213,7 @@ public unsafe partial class ReplayListWindow : Window
                     ImGui.EndTooltip();
                 }
 
-                if (ImGui.BeginPopupContextItem("ReplyContextMenu"))
+                if (ImGui.BeginPopupContextItem($"ReplyContextMenu_{i}"))
                 {
                     for (byte j = 0; j < 3; j++)
                     {
