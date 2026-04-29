@@ -8,7 +8,6 @@ using Dalamud.Game.Config;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Lumina.Excel.Sheets;
@@ -39,7 +38,7 @@ public static unsafe class ReplayManager
 
     public static readonly MemoryPatch ReplaceLocalPlayerNamePatch =
         new("75 ?? 48 8D 4C 24 ?? E8 ?? ?? ?? ?? F6 05", [0x90, 0x90]);
-    
+
     private static readonly MemoryPatch RemoveProcessingLimitPatch =
         new("41 FF C7 48 39 43", [0x90, 0x90, 0x90]);
 
@@ -60,26 +59,44 @@ public static unsafe class ReplayManager
     private static Hook<ContentsReplayModule.ReplayPacketDelegate>?              ReplayPacketHook;
 
     private static readonly CompSig OnSetChapterSig = new("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC 30 48 8B F1 0F B6 EA");
-    private delegate        void    OnSetChapterDelegate(ContentsReplayModule* contentsReplayModule, byte chapter);
-    private static          Hook<OnSetChapterDelegate>? OnSetChapterHook;
-    
+
+    private delegate void OnSetChapterDelegate(ContentsReplayModule* contentsReplayModule, byte chapter);
+
+    private static Hook<OnSetChapterDelegate>? OnSetChapterHook;
+
     private static readonly CompSig FormatAddonTextTimestampSig = new("E8 ?? ?? ?? ?? 48 8B D0 8D 4F 0E");
-    public delegate nint FormatAddonTextTimestampDelegate(
-        nint raptureTextModule, uint addonSheetRow, int a3, uint hours, uint minutes, uint seconds, uint a7);
+
+    public delegate nint FormatAddonTextTimestampDelegate
+    (
+        nint raptureTextModule,
+        uint addonSheetRow,
+        int  a3,
+        uint hours,
+        uint minutes,
+        uint seconds,
+        uint a7
+    );
+
     private static Hook<FormatAddonTextTimestampDelegate>? FormatAddonTextTimestampHook;
 
     private static readonly CompSig DisplayRecordingOnDTRBarSig = new("E8 ?? ?? ?? ?? 44 0F B6 C0 BA 4F 00 00 00");
+
     private delegate bool DisplayRecordingOnDTRBarDelegate(nint agent);
+
     private static Hook<DisplayRecordingOnDTRBarDelegate>? DisplayRecordingOnDTRBarHook;
 
     private static readonly CompSig ContentDirectorSynchronizeSig =
         new("40 53 55 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 0F B6 81 ?? ?? ?? ??");
+
     private delegate void ContentDirectorSynchronizeDelegate(nint contentDirector);
+
     private static Hook<ContentDirectorSynchronizeDelegate>? ContentDirectorSynchronizeHook;
 
     private static readonly CompSig EventBeginSig =
         new("40 53 55 57 41 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B 59 08");
+
     private delegate nint EventBeginDelegate(nint a1, nint a2);
+
     private static Hook<EventBeginDelegate>? EventBeginHook;
 
     private static readonly CompSig WaymarkToggleSig = new("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? EB 3B");
@@ -89,34 +106,44 @@ public static unsafe class ReplayManager
     private static          short   contentDirectorOffset;
 
     private static readonly CompSig DisplaySelectedDutyRecordingSig = new("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 39 6E 34");
+
     private delegate void DisplaySelectedDutyRecordingDelegate(nint a1);
+
     private static DisplaySelectedDutyRecordingDelegate? displaySelectedDutyRecording;
 
     private static readonly CompSig DeleteCharacterAtIndexSig = new("E8 ?? ?? ?? ?? 33 D2 48 8D 47 50");
+
     private delegate void DeleteCharacterAtIndexDelegate(CharacterManager* manager, int index);
+
     private static DeleteCharacterAtIndexDelegate? deleteCharacterAtIndex;
 
-    public static readonly CompSig                             GetReplayDataSegmentSig = new("40 53 48 83 EC ?? F6 81 ?? ?? ?? ?? ?? 48 8B D9 0F 85 ?? ?? ?? ?? F6 81");
-    public delegate        FFXIVReplay.DataSegment*            GetReplayDataSegmentDelegate(ContentsReplayModule* contentsReplayModule);
-    private static         Hook<GetReplayDataSegmentDelegate>? GetReplayDataSegmentHook;
+    public static readonly CompSig GetReplayDataSegmentSig = new("40 53 48 83 EC ?? F6 81 ?? ?? ?? ?? ?? 48 8B D9 0F 85 ?? ?? ?? ?? F6 81");
+
+    public delegate FFXIVReplay.DataSegment* GetReplayDataSegmentDelegate(ContentsReplayModule* contentsReplayModule);
+
+    private static Hook<GetReplayDataSegmentDelegate>? GetReplayDataSegmentHook;
 
     public static readonly CompSig PlaybackUpdateSig = new("48 8B C4 53 48 81 EC ?? ?? ?? ?? F6 81 ?? ?? ?? ?? ?? 48 8B D9 0F 84 ?? ?? ?? ?? 48 89 68");
-    public delegate        void PlaybackUpdateDelegate(ContentsReplayModule* contentsReplayModule);
-    private static         Hook<PlaybackUpdateDelegate>? PlaybackUpdateHook;
-    
-    public static readonly CompSig                       ExecuteCommandSig = new("E8 ?? ?? ?? ?? 48 8B 06 48 8B CE FF 50 ?? E9 ?? ?? ?? ?? 49 8B CC");
-    private delegate       nint                          ExecuteCommandDelegate(int command, int param1, int param2, int param3, int param4);
-    private static         Hook<ExecuteCommandDelegate>? ExecuteCommandHook;
+
+    public delegate void PlaybackUpdateDelegate(ContentsReplayModule* contentsReplayModule);
+
+    private static Hook<PlaybackUpdateDelegate>? PlaybackUpdateHook;
+
+    public static readonly CompSig ExecuteCommandSig = new("E8 ?? ?? ?? ?? 48 8B 06 48 8B CE FF 50 ?? E9 ?? ?? ?? ?? 49 8B CC");
+
+    private delegate bool ExecuteCommandDelegate(int command, int param1, int param2, int param3, int param4);
+
+    private static Hook<ExecuteCommandDelegate>? ExecuteCommandHook;
 
     #endregion
-    
+
     private static readonly HashSet<int> ExecuteCommandFlagsToIgnore = [201, 1981];
-    
+
     private static FFXIVReplay* LoadedReplay;
     private static byte         QuickLoadChapter;
     private static byte         SeekingChapter;
     private static uint         SeekingOffset;
-    
+
     public static bool IsWaymarkVisible
     {
         get => (*waymarkToggle & 2) != 0;
@@ -132,19 +159,22 @@ public static unsafe class ReplayManager
     public static void Init()
     {
         Service.Toast.Toast += OnToast;
-        
+
         var address = Service.SigScanner.ScanModule("48 39 43 ?? 0F 83 ?? ?? ?? ?? 48 8B 4B");
 
         GetReplayDataSegmentHook ??= GetReplayDataSegmentSig.GetHook<GetReplayDataSegmentDelegate>(GetReplayDataSegmentDetour);
-        CreateGetReplaySegmentHookPatch ??= new(address,
-        [
-            0x48, 0x8B, 0xCB,
-            0xE8, .. BitConverter.GetBytes((int)(GetReplayDataSegmentHook.Address - (address + 0x8))),
-            0x4C, 0x8B, 0xF0,
-            0xEB, 0x3A,
-            0x90
-        ]);
-        
+        CreateGetReplaySegmentHookPatch ??= new
+        (
+            address,
+            [
+                0x48, 0x8B, 0xCB,
+                0xE8, .. BitConverter.GetBytes((int)(GetReplayDataSegmentHook.Address - (address + 0x8))),
+                0x4C, 0x8B, 0xF0,
+                0xEB, 0x3A,
+                0x90
+            ]
+        );
+
         RemoveProcessingLimitPatch.Enable();
         CreateGetReplaySegmentHookPatch.Enable();
         RemoveRecordReadyToastPatch.Enable();
@@ -183,8 +213,10 @@ public static unsafe class ReplayManager
         RequestPlaybackHook.Enable();
 
         ReceiveActorControlPacketHook ??=
-            ContentsReplayModule.ReceiveActorControlPacketSig.GetHook<ContentsReplayModule.ReceiveActorControlPacketDelegate>(
-                ReceiveActorControlPacketDetour);
+            ContentsReplayModule.ReceiveActorControlPacketSig.GetHook<ContentsReplayModule.ReceiveActorControlPacketDelegate>
+            (
+                ReceiveActorControlPacketDetour
+            );
         ReceiveActorControlPacketHook.Enable();
 
         OnSetChapterHook ??= OnSetChapterSig.GetHook<OnSetChapterDelegate>(OnSetChapterDetour);
@@ -211,7 +243,7 @@ public static unsafe class ReplayManager
         InstantFadeOutPatch.Disable();
         InstantFadeInPatch.Disable();
         ReplaceLocalPlayerNamePatch.Disable();
-        
+
         ExecuteCommandHook?.Dispose();
         ExecuteCommandHook = null;
 
@@ -253,7 +285,7 @@ public static unsafe class ReplayManager
 
         EventBeginHook?.Dispose();
         EventBeginHook = null;
-        
+
         Service.Toast.Toast -= OnToast;
 
         if (LoadedReplay == null) return;
@@ -267,14 +299,14 @@ public static unsafe class ReplayManager
         Marshal.FreeHGlobal((nint)LoadedReplay);
         LoadedReplay = null;
     }
-    
+
     private static void OnToast(ref SeString message, ref ToastOptions options, ref bool isHandled)
     {
-        if (isHandled || (!ContentsReplayModule.Instance()->IsLoadingChapter && ContentsReplayModule.Instance()->Speed < 5)) return;
+        if (isHandled || !ContentsReplayModule.Instance()->IsLoadingChapter && ContentsReplayModule.Instance()->Speed < 5) return;
         isHandled = true;
     }
 
-    
+
     #region Hook Detour
 
     private static void OnZoneInPacketDetour(ContentsReplayModule* contentsReplayModule, uint gameObjectID, nint packet)
@@ -290,10 +322,10 @@ public static unsafe class ReplayManager
     {
         var zoneID = contentsReplayModule->InitZonePacketData.TerritoryType;
         if (zoneID == 0) return;
-        
+
         var contentID = Service.Data.GetExcelSheet<TerritoryType>().GetRow(zoneID).ContentFinderCondition.RowId;
         if (contentID == 0) return;
-        
+
         contentsReplayModule->InitZonePacketData.ContentFinderCondition = (ushort)contentID;
 
         contentsReplayModule->FixNextReplaySaveSlot(Service.Config.MaxAutoRenamedReplays);
@@ -342,7 +374,7 @@ public static unsafe class ReplayManager
         if (string.IsNullOrEmpty(ReplayFileManager.LastSelectedReplay))
             LoadReplay(contentsReplayModule->CurrentReplaySlot);
         else
-            ReplayManager.LoadReplay(ReplayFileManager.LastSelectedReplay);
+            LoadReplay(ReplayFileManager.LastSelectedReplay);
     }
 
     private static void PlaybackUpdateDetour(ContentsReplayModule* contentsReplayModule)
@@ -365,17 +397,24 @@ public static unsafe class ReplayManager
     }
 
     public static FFXIVReplay.DataSegment* GetReplayDataSegmentDetour(ContentsReplayModule* contentsReplayModule) =>
-        ReplayManager.GetReplayDataSegment(contentsReplayModule);
+        GetReplayDataSegment(contentsReplayModule);
 
     private static void OnSetChapterDetour(ContentsReplayModule* contentsReplayModule, byte chapter)
     {
         OnSetChapterHook.Original(contentsReplayModule, chapter);
-        ReplayManager.OnSetChapter(contentsReplayModule, chapter);
+        OnSetChapter(contentsReplayModule, chapter);
     }
 
-    private static nint FormatAddonTextTimestampDetour(
-        nint raptureTextModule, uint addonSheetRow, int a3, uint hours, uint minutes,
-        uint seconds,           uint a7)
+    private static nint FormatAddonTextTimestampDetour
+    (
+        nint raptureTextModule,
+        uint addonSheetRow,
+        int  a3,
+        uint hours,
+        uint minutes,
+        uint seconds,
+        uint a7
+    )
     {
         var ret = FormatAddonTextTimestampHook.Original(raptureTextModule, addonSheetRow, a3, hours, minutes, seconds, a7);
 
@@ -400,7 +439,7 @@ public static unsafe class ReplayManager
     }
 
     private static bool DisplayRecordingOnDTRBarDetour(nint agent) =>
-        Service.Config.EnableRecordingIcon            &&
+        Service.Config.EnableRecordingIcon           &&
         ContentsReplayModule.Instance()->IsRecording &&
         Service.PI.UiBuilder.ShouldModifyUi;
 
@@ -416,7 +455,7 @@ public static unsafe class ReplayManager
     }
 
     private static nint EventBeginDetour(nint a1, nint a2) =>
-        !ContentsReplayModule.Instance()->InPlayback                                                       ||
+        !ContentsReplayModule.Instance()->InPlayback                                                      ||
         !Service.GameConfig.UiConfig.TryGetBool(nameof(UiConfigOption.CutsceneSkipIsContents), out var b) ||
         !b
             ? EventBeginHook.Original(a1, a2)
@@ -424,27 +463,27 @@ public static unsafe class ReplayManager
 
     private static bool ReplayPacketDetour(ContentsReplayModule* contentsReplayModule, FFXIVReplay.DataSegment* segment, byte* data) =>
         ReplayPacketManager.ReplayPacket(segment, data) || ReplayPacketHook.Original(contentsReplayModule, segment, data);
-    
-    private static nint OnExecuteCommandDetour(int command, int param1, int param2, int param3, int param4)
+
+    private static bool OnExecuteCommandDetour(int command, int param1, int param2, int param3, int param4)
     {
         if (!ContentsReplayModule.Instance()->InPlayback ||
             ExecuteCommandFlagsToIgnore.Contains(command))
             return ExecuteCommandHook.Original(command, param1, param2, param3, param4);
 
-        if (command == 314) SetConditionFlag(ConditionFlag.WatchingCutscene, param1 != 0);
+        if (command == 314)
+            SetConditionFlag(ConditionFlag.WatchingCutscene, param1 != 0);
 
-        return nint.Zero;
+        return false;
     }
 
-
     #endregion
-    
+
     #region Control
-    
+
     public static void DisplaySelectedDutyRecording(nint agent) => displaySelectedDutyRecording(agent);
 
     public static void DeleteCharacterAtIndex(int i) => deleteCharacterAtIndex(CharacterManager.Instance(), i);
-    
+
     public static void PlaybackUpdate(ContentsReplayModule* contentsReplayModule)
     {
         if (LoadedReplay == null) return;
@@ -480,9 +519,9 @@ public static unsafe class ReplayManager
 
     public static void OnSetChapter(ContentsReplayModule* contentsReplayModule, byte chapter)
     {
-        if (!Service.Config.EnableQuickLoad                    ||
+        if (!Service.Config.EnableQuickLoad                   ||
             chapter                                      <= 0 ||
-            contentsReplayModule->ReplayChapters.Length        < 2  ||
+            contentsReplayModule->ReplayChapters.Length  < 2  ||
             ContentsReplayModule.GetCurrentChapter() + 1 == chapter)
             return;
 
@@ -502,7 +541,7 @@ public static unsafe class ReplayManager
             Marshal.FreeHGlobal((nint)LoadedReplay);
 
         LoadedReplay = newReplay;
-        
+
         ContentsReplayModule.Instance()->ReplayHeader   = LoadedReplay->ReplayHeader;
         ContentsReplayModule.Instance()->ReplayChapters = LoadedReplay->ReplayChapters;
         ContentsReplayModule.Instance()->DataLoadType   = 0;
@@ -581,6 +620,7 @@ public static unsafe class ReplayManager
         }
 
         var nextEvent = ContentsReplayModule.Instance()->ReplayChapters.FindNextChapterType(SeekingChapter, 4);
+
         if (nextEvent != 0 && nextEvent < QuickLoadChapter - 1)
         {
             var nextCountdown = ContentsReplayModule.Instance()->ReplayChapters.FindNextChapterType(nextEvent, 1);
@@ -600,7 +640,6 @@ public static unsafe class ReplayManager
         JumpToTimeBeforeChapter(ContentsReplayModule.Instance()->ReplayChapters.FindPreviousChapterType(QuickLoadChapter, 2), 15_000);
         ReplaySection(0, QuickLoadChapter);
     }
-    
+
     #endregion
 }
-

@@ -20,12 +20,12 @@ namespace ARealmRecordedLite.Windows;
 
 public unsafe partial class ReplayListWindow : Window
 {
-    private const ImGuiWindowFlags FlagsWindow = ImGuiWindowFlags.NoDecoration    | ImGuiWindowFlags.NoMove |
+    private const ImGuiWindowFlags FLAGS_WINDOW = ImGuiWindowFlags.NoDecoration    | ImGuiWindowFlags.NoMove |
                                                  ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoTitleBar;
 
     public static AtkUnitBase* ContentsReplaySetting => GetAddonByName("ContentsReplaySetting");
     
-    public ReplayListWindow() : base("ReplayListWindow##DailyRoutines", FlagsWindow)
+    public ReplayListWindow() : base("ReplayListWindow##DailyRoutines", FLAGS_WINDOW)
     {
         Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup,   "ContentsReplaySetting", OnAddon);
         Service.AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "ContentsReplaySetting", OnAddon);
@@ -110,11 +110,11 @@ public unsafe partial class ReplayListWindow : Window
 
         ImGui.TableHeadersRow();
 
-        var sortspecs = ImGui.TableGetSortSpecs();
-        if (sortspecs.SpecsDirty || NeedSort || ImGui.IsWindowAppearing())
+        var sortSpecs = ImGui.TableGetSortSpecs();
+        if (sortSpecs.SpecsDirty || NeedSort || ImGui.IsWindowAppearing())
         {
-            if (sortspecs.Specs.ColumnIndex == 0)
-                ReplayFileManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+            if (sortSpecs.Specs.ColumnIndex == 0)
+                ReplayFileManager.ReplayList = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
                                       ?
                                       [
                                           .. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable)
@@ -126,11 +126,11 @@ public unsafe partial class ReplayListWindow : Window
                                                  .ThenByDescending(t => t.Item2.ReplayHeader.Timestamp)
                                       ];
             else
-                ReplayFileManager.ReplayList = sortspecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                ReplayFileManager.ReplayList = sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
                                       ? [.. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable).ThenBy(t => t.Item1.Name)]
                                       : [.. ReplayFileManager.ReplayList.OrderByDescending(t => t.Item2.ReplayHeader.IsPlayable).ThenByDescending(t => t.Item1.Name)];
 
-            sortspecs.SpecsDirty = false;
+            sortSpecs.SpecsDirty = false;
             NeedSort             = false;
         }
 
@@ -142,7 +142,6 @@ public unsafe partial class ReplayListWindow : Window
             var fileName    = file.Name;
             var displayName = DisplayNameRegex.Match(fileName) is { Success: true } match ? match.Groups[1].Value : fileName[..fileName.LastIndexOf('.')];
             var isPlayable  = replay.ReplayHeader.IsPlayable;
-            var autoRenamed = file.Directory?.Name == "autorenamed";
 
             ImGui.TableNextRow();
 
@@ -166,8 +165,7 @@ public unsafe partial class ReplayListWindow : Window
                 {
                     var (pulls, longestPull) = replay.GetPullInfo();
 
-                    ImGui.BeginTooltip();
-
+                    using (ImRaii.Tooltip())
                     using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero))
                     {
                         ImGui.TextUnformatted($"任务: {header.ContentFinderCondition.Name.ToDalamudString()}");
@@ -209,26 +207,25 @@ public unsafe partial class ReplayListWindow : Window
                             ImGui.TextUnformatted($"单次最久: {longestPull:hh':'mm':'ss}");
                         }
                     }
-
-                    ImGui.EndTooltip();
                 }
 
-                if (ImGui.BeginPopupContextItem($"ReplyContextMenu_{i}"))
+                using (var context = ImRaii.ContextPopupItem($"ReplyContextMenu_{i}"))
                 {
-                    for (byte j = 0; j < 3; j++)
+                    if (context)
                     {
-                        if (!ImGui.Selectable($"复制到第 {j + 1} 槽")) continue;
-                        ReplayFileManager.CopyReplayIntoSlot((nint)agent, file, header, j);
-                        NeedSort = true;
-                    }
+                        for (byte j = 0; j < 3; j++)
+                        {
+                            if (!ImGui.Selectable($"复制到第 {j + 1} 槽")) continue;
+                            ReplayFileManager.CopyReplayIntoSlot((nint)agent, file, header, j);
+                            NeedSort = true;
+                        }
 
-                    if (ImGui.Selectable("删除"))
-                    {
-                        ReplayFileManager.DeleteReplay(file);
-                        NeedSort = true;
+                        if (ImGui.Selectable("删除"))
+                        {
+                            ReplayFileManager.DeleteReplay(file);
+                            NeedSort = true;
+                        }
                     }
-
-                    ImGui.EndPopup();
                 }
 
                 if (!ImGui.IsItemHovered() || !ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) continue;
