@@ -20,8 +20,11 @@ namespace ARealmRecordedLite.Windows;
 
 public unsafe partial class ReplayListWindow : Window
 {
-    private const ImGuiWindowFlags FLAGS_WINDOW = ImGuiWindowFlags.NoDecoration    | ImGuiWindowFlags.NoMove |
-                                                 ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoTitleBar;
+    private const ImGuiWindowFlags FLAGS_WINDOW =
+        ImGuiWindowFlags.NoDecoration    |
+        ImGuiWindowFlags.NoMove          |
+        ImGuiWindowFlags.NoSavedSettings |
+        ImGuiWindowFlags.NoTitleBar;
 
     public static AtkUnitBase* ContentsReplaySetting => GetAddonByName("ContentsReplaySetting");
     
